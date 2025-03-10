@@ -25,8 +25,9 @@ public class Main {
             InputStream inputStream = clientSocket.getInputStream();
 
             Scanner sc = new Scanner(inputStream);
-
+            System.out.println("=====================================================================================================");
             System.out.println(sc.nextLine());
+            System.out.println("=====================================================================================================");
 
         } catch (IOException e) {
           System.out.println("IOException: " + e.getMessage());
