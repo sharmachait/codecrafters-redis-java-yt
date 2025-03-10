@@ -1,7 +1,9 @@
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Main {
   public static void main(String[] args){
@@ -20,14 +22,18 @@ public class Main {
           // Wait for connection from client.
           clientSocket = serverSocket.accept();
 
-            OutputStream outputStream = clientSocket.getOutputStream();
-            outputStream.write("+PONG\r\n".getBytes());
+            InputStream inputStream = clientSocket.getInputStream();
+
+            Scanner sc = new Scanner(inputStream);
+
+            System.out.println(sc.nextLine());
+
         } catch (IOException e) {
           System.out.println("IOException: " + e.getMessage());
         } finally {
           try {
             if (clientSocket != null) {
-              clientSocket.close();
+                clientSocket.close();
             }
           } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
