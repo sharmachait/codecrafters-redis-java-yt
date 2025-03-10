@@ -48,7 +48,7 @@ public class Main {
         InputStream inputStream = clientSocket.getInputStream();
         OutputStream outputStream = clientSocket.getOutputStream();
         Scanner sc = new Scanner(inputStream);
-        sc.useDelimiter("\r\n\r\n\r\n\r\n");
+//        sc.useDelimiter("\r\n\r\n\r\n\r\n");
 
         while(sc.hasNextLine()){
             String nextLine = sc.next();
