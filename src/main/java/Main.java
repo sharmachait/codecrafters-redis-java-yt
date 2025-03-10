@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
 
 public class Main {
   public static void main(String[] args){
@@ -16,23 +17,23 @@ public class Main {
         int port = 6379;
         try {
           serverSocket = new ServerSocket(port);
-          // Since the tester restarts your program quite often, setting SO_REUSEADDR
-          // ensures that we don't run into 'Address already in use' errors
           serverSocket.setReuseAddress(true);
-          // Wait for connection from client.
-          clientSocket = serverSocket.accept();
 
-            InputStream inputStream = clientSocket.getInputStream();
-            OutputStream outputStream = clientSocket.getOutputStream();
-            Scanner sc = new Scanner(inputStream);
-            System.out.println("=====================================================================================================");
-            while(sc.hasNextLine()){
-                String nextLine = sc.nextLine();
-                if(nextLine.contains("PING")){
-                    outputStream.write("+PONG\r\n".getBytes());
-                }
+            while (true) {
+                clientSocket = serverSocket.accept();
+                Socket finalClientSocket = clientSocket;
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        handleClient(finalClientSocket);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
-            System.out.println("=====================================================================================================");
+
+
+
+
 
         } catch (IOException e) {
           System.out.println("IOException: " + e.getMessage());
@@ -46,4 +47,18 @@ public class Main {
           }
         }
   }
+
+    private static void handleClient(Socket clientSocket) throws IOException {
+        InputStream inputStream = clientSocket.getInputStream();
+        OutputStream outputStream = clientSocket.getOutputStream();
+        Scanner sc = new Scanner(inputStream);
+        System.out.println("=====================================================================================================");
+        while(sc.hasNextLine()){
+            String nextLine = sc.nextLine();
+            if(nextLine.contains("PING")){
+                outputStream.write("+PONG\r\n".getBytes());
+            }
+        }
+        System.out.println("=====================================================================================================");
+    }
 }
