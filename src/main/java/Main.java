@@ -48,21 +48,24 @@ public class Main {
         InputStream inputStream = clientSocket.getInputStream();
         OutputStream outputStream = clientSocket.getOutputStream();
         Scanner sc = new Scanner(inputStream);
-        System.out.println("=====================================================================================================");
+        sc.useDelimiter("\r\n\r\n\r\n\r\n");
+
         while(sc.hasNextLine()){
             String nextLine = sc.nextLine();
+            System.out.println("=====================================================================================================");
             System.out.println(nextLine);
-            if(nextLine.contains("PING")){
-                outputStream.write("+PONG\r\n".getBytes());
-            }
-            if(nextLine.contains("ECHO")){
-                String respHeader = sc.nextLine();
-                String respBody = sc.nextLine();
-                String response = respHeader + "\r\n" + respBody+"\r\n";
-                outputStream.write(response.getBytes());
-            }
+            System.out.println("=====================================================================================================");
+//            if(nextLine.contains("PING")){
+//                outputStream.write("+PONG\r\n".getBytes());
+//            }
+//            if(nextLine.contains("ECHO")){
+//                String respHeader = sc.nextLine();
+//                String respBody = sc.nextLine();
+//                String response = respHeader + "\r\n" + respBody+"\r\n";
+//                outputStream.write(response.getBytes());
+//            }
         }
-        System.out.println("=====================================================================================================");
+
     }
 
     public static String encodingRespString(String s){
