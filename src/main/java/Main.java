@@ -26,7 +26,9 @@ public class Main {
 
             Scanner sc = new Scanner(inputStream);
             System.out.println("=====================================================================================================");
-            System.out.println(sc.nextLine());
+            while(sc.hasNextLine()){
+                System.out.println(sc.nextLine());
+            }
             System.out.println("=====================================================================================================");
 
         } catch (IOException e) {
