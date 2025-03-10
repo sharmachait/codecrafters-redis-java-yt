@@ -58,8 +58,8 @@ public class Main {
             if(nextLine.contains("ECHO")){
                 String respHeader = sc.nextLine();
                 String respBody = sc.nextLine();
-
-                outputStream.write((respHeader+respBody).getBytes());
+                String response = respHeader + "\r\n" + respBody+"\r\n";
+                outputStream.write(response.getBytes());
             }
         }
         System.out.println("=====================================================================================================");
