@@ -31,10 +31,6 @@ public class Main {
                 });
             }
 
-
-
-
-
         } catch (IOException e) {
           System.out.println("IOException: " + e.getMessage());
         } finally {
@@ -55,9 +51,10 @@ public class Main {
         System.out.println("=====================================================================================================");
         while(sc.hasNextLine()){
             String nextLine = sc.nextLine();
-            if(nextLine.contains("PING")){
-                outputStream.write("+PONG\r\n".getBytes());
-            }
+            System.out.println(nextLine);
+//            if(nextLine.contains("PING")){
+//                outputStream.write("+PONG\r\n".getBytes());
+//            }
         }
         System.out.println("=====================================================================================================");
     }
