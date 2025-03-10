@@ -51,7 +51,7 @@ public class Main {
         sc.useDelimiter("\r\n\r\n\r\n\r\n");
 
         while(sc.hasNextLine()){
-            String nextLine = sc.nextLine();
+            String nextLine = sc.next();
             System.out.println("=====================================================================================================");
             System.out.println(nextLine);
             System.out.println("=====================================================================================================");
