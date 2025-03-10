@@ -52,10 +52,25 @@ public class Main {
         while(sc.hasNextLine()){
             String nextLine = sc.nextLine();
             System.out.println(nextLine);
-//            if(nextLine.contains("PING")){
-//                outputStream.write("+PONG\r\n".getBytes());
-//            }
+            if(nextLine.contains("PING")){
+                outputStream.write("+PONG\r\n".getBytes());
+            }
+            if(nextLine.contains("ECHO")){
+                String respHeader = sc.nextLine();
+                String respBody = sc.nextLine();
+
+                outputStream.write((respHeader+respBody).getBytes());
+            }
         }
         System.out.println("=====================================================================================================");
+    }
+
+    public static String encodingRespString(String s){
+      String resp = "$";
+      resp+=s.length();
+      resp+="\r\n";
+      resp+=s;
+      resp+="\r\n";
+      return resp;
     }
 }
