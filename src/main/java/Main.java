@@ -23,11 +23,14 @@ public class Main {
           clientSocket = serverSocket.accept();
 
             InputStream inputStream = clientSocket.getInputStream();
-
+            OutputStream outputStream = clientSocket.getOutputStream();
             Scanner sc = new Scanner(inputStream);
             System.out.println("=====================================================================================================");
             while(sc.hasNextLine()){
-                System.out.println(sc.nextLine());
+                String nextLine = sc.nextLine();
+                if(nextLine.contains("PING")){
+                    outputStream.write("+PONG\r\n".getBytes());
+                }
             }
             System.out.println("=====================================================================================================");
 
