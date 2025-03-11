@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class TcpServer {
-    @Autowired
-    private RespSerializer respSerializer;
+
+    private final RespSerializer respSerializer;
     public void startServer(){
         respSerializer.printWorking();
     }
