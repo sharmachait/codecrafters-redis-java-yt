@@ -16,7 +16,7 @@ public class Main {
     System.out.println("Logs from your program will appear here!");
       AnnotationConfigApplicationContext context =
               new AnnotationConfigApplicationContext(AppConfig.class);
-      TcpServer app =context.getBean(TcpServer.class);
+      TcpServer app = context.getBean(TcpServer.class);
 
       app.startServer();
     //  Uncomment this block to pass the first stage
