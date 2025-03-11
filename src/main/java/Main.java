@@ -1,3 +1,5 @@
+import Components.TcpServer;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -7,10 +9,12 @@ import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 
 public class Main {
+
   public static void main(String[] args){
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     System.out.println("Logs from your program will appear here!");
-
+      TcpServer tcpServer = new TcpServer();
+      tcpServer.startServer();
     //  Uncomment this block to pass the first stage
         ServerSocket serverSocket = null;
         Socket clientSocket = null;
