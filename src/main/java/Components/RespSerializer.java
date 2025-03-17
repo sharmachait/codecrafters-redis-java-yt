@@ -33,10 +33,11 @@ public class RespSerializer {
     }
 
     public List<String[]> deseralize(byte[] command){
-
+        System.out.println(command);
         String data = new String(command, StandardCharsets.UTF_8);
-        char[] dataArr = data.toCharArray();
         System.out.println(data);
+        char[] dataArr = data.toCharArray();
+
         System.out.println(dataArr.length);
         List<String[]> res = new ArrayList<>();
 
