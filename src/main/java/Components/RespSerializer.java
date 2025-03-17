@@ -41,6 +41,7 @@ public class RespSerializer {
 
         int i=0;
         while(i < dataArr.length){
+            System.out.println(i);
             char curr = dataArr[i];
             if(curr == '*'){
                 //array
