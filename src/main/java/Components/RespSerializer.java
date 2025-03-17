@@ -33,6 +33,7 @@ public class RespSerializer {
     }
 
     public List<String[]> deseralize(byte[] command){
+        System.out.println("control reached here x 2");
         System.out.println(command);
         String data = new String(command, StandardCharsets.UTF_8);
         System.out.println(data);
