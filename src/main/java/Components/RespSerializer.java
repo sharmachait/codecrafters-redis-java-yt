@@ -40,8 +40,10 @@ public class RespSerializer {
 
             int i=0;
             while(i < dataArr.length){
-                System.out.println(i);
+
                 char curr = dataArr[i];
+                System.out.println("=================================================================================");
+                System.out.println(i);
                 System.out.println(curr);
                 if(curr == '*'){
                     //array
