@@ -59,7 +59,9 @@ public class TcpServer {
         while(client.socket.isConnected()){
             byte[] buffer = new byte[client.socket.getReceiveBufferSize()];
             int bytesRead = client.inputStream.read(buffer);
+            System.out.println(bytesRead);
             if(bytesRead > 0){
+                System.out.println("control reached here");
                 // bytes parsing into strings
                 List<String[]> res = respSerializer.deseralize(buffer);
                 System.out.println(res.size());

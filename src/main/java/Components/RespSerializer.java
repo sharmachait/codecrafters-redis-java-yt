@@ -36,7 +36,8 @@ public class RespSerializer {
 
         String data = new String(command, StandardCharsets.UTF_8);
         char[] dataArr = data.toCharArray();
-
+        System.out.println(data);
+        System.out.println(dataArr.length);
         List<String[]> res = new ArrayList<>();
 
         int i=0;
