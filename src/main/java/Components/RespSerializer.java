@@ -47,6 +47,7 @@ public class RespSerializer {
             while(i < dataArr.length){
                 System.out.println(i);
                 char curr = dataArr[i];
+                System.out.println(curr);
                 if(curr == '*'){
                     //array
                     String arrLen = "";
