@@ -45,6 +45,8 @@ public class RespSerializer {
                 System.out.println("=================================================================================");
                 System.out.println(i);
                 System.out.println(curr);
+                if(curr=='\u0000')
+                    break;
                 if(curr == '*'){
                     //array
                     String arrLen = "";
