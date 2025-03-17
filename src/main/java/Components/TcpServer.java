@@ -55,7 +55,7 @@ public class TcpServer {
         }
     }
     private static void handleClient(Client client) throws IOException {
-
+        System.out.println("=============================================================================================");
         while(client.socket.isConnected()){
             byte[] buffer = new byte[client.socket.getReceiveBufferSize()];
             int bytesRead = client.inputStream.read(buffer);
