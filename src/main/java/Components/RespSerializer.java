@@ -45,8 +45,12 @@ public class RespSerializer {
                 System.out.println("=================================================================================");
                 System.out.println(i);
                 System.out.println(curr);
-                if(curr=='\u0000')
+                if(curr=='\u0000'){
+                    System.out.println(i);
+                    System.out.println(dataArr.length);
                     break;
+                }
+
                 if(curr == '*'){
                     //array
                     String arrLen = "";
