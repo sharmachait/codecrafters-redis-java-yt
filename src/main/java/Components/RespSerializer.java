@@ -34,13 +34,8 @@ public class RespSerializer {
 
     public List<String[]> deseralize(byte[] command){
         try{
-            System.out.println("control reached here x 2");
-            System.out.println(command);
             String data = new String(command, StandardCharsets.UTF_8);
-            System.out.println(data);
             char[] dataArr = data.toCharArray();
-
-            System.out.println(dataArr.length);
             List<String[]> res = new ArrayList<>();
 
             int i=0;

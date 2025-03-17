@@ -62,13 +62,7 @@ public class TcpServer {
             if(bytesRead > 0){
                 // bytes parsing into strings
                 List<String[]> res = respSerializer.deseralize(buffer);
-                System.out.println(res.size());
-                for(String[] s :res){
-                    System.out.println();
-                    for(String ss: s){
-                        System.out.print(ss + " ");
-                    }
-                }
+
             }
         }
 //        Scanner sc = new Scanner(client.inputStream);
