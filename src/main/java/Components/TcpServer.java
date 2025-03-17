@@ -59,10 +59,10 @@ public class TcpServer {
         while(client.socket.isConnected()){
             byte[] buffer = new byte[client.socket.getReceiveBufferSize()];
             int bytesRead = client.inputStream.read(buffer);
-            System.out.println(bytesRead);
             if(bytesRead > 0){
                 // bytes parsing into strings
                 List<String[]> res = respSerializer.deseralize(buffer);
+                System.out.println(res.size());
                 for(String[] s :res){
                     System.out.println();
                     for(String ss: s){
