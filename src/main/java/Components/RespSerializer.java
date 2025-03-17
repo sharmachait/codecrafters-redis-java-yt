@@ -42,11 +42,11 @@ public class RespSerializer {
             while(i < dataArr.length){
 
                 char curr = dataArr[i];
-                System.out.println("=================================================================================");
-                System.out.println(i);
-                System.out.println(curr);
+
                 if(curr=='\u0000'){
+                    System.out.println("=================================================================================");
                     System.out.println(i);
+                    System.out.println(curr);
                     System.out.println(dataArr.length);
                     break;
                 }
