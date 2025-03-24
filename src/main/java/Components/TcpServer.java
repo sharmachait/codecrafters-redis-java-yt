@@ -61,13 +61,10 @@ public class TcpServer {
             System.out.println(bytesRead);
             if(bytesRead > 0){
                 // bytes parsing into strings
-                List<String[]> res = respSerializer.deseralize(buffer);
-                System.out.println(res.size());
-                for(String[] s :res){
-                    System.out.println();
-                    for(String ss: s){
-                        System.out.print(ss + " ");
-                    }
+                List<String[]> commands = respSerializer.deseralize(buffer);
+
+                for(String[] command :commands){
+                    handleCommand(command, client);
                 }
             }
         }
@@ -89,5 +86,12 @@ public class TcpServer {
 //            }
 //        }
 
+    }
+
+    private void handleCommand(String[] command, Client client) {
+        System.out.println("==========================================command=============================================");
+        for(String s:command){
+            System.out.println(s+" ");
+        }
     }
 }
