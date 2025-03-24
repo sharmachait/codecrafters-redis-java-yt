@@ -63,10 +63,12 @@ public class RespSerializer {
                         // *2
                         // *3\r\n#3set\r\n#3key\r\n#5value
                         // *3\r\n#3set\r\n#3key\r\n#5value
-                        for(int t=0;t<Integer.parseInt(arrLen);i++){
+                        for(int t=0;t<Integer.parseInt(arrLen);t++){
                             String nestedLen = "";
                             i++;
+                            char c = dataArr[i];
                             while(i < dataArr.length && Character.isDigit(dataArr[i])){
+
                                 nestedLen += dataArr[i++];
                             }
                             i+=2;
