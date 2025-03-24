@@ -9,13 +9,14 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 
 @Component
 public class TcpServer {
     @Autowired
     private RespSerializer respSerializer;
+    @Autowired
+    private CommandHandler commandHandler;
     public void startServer(){
         ServerSocket serverSocket = null;
         Socket clientSocket = null;
@@ -68,30 +69,22 @@ public class TcpServer {
                 }
             }
         }
-//        Scanner sc = new Scanner(client.inputStream);
-//
-//        while(sc.hasNextLine()){
-//            String nextLine = sc.next();
-//            System.out.println("=====================================================================================================");
-//            System.out.println(nextLine);
-//            System.out.println("=====================================================================================================");
-//            if(nextLine.contains("PING")){
-//                outputStream.write("+PONG\r\n".getBytes());
-//            }
-//            if(nextLine.contains("ECHO")){
-//                String respHeader = sc.nextLine();
-//                String respBody = sc.nextLine();
-//                String response = respHeader + "\r\n" + respBody+"\r\n";
-//                outputStream.write(response.getBytes());
-//            }
-//        }
-
     }
 
-    private void handleCommand(String[] command, Client client) {
-        System.out.println("==========================================command=============================================");
-        for(String s:command){
-            System.out.println(s+" ");
+    private void handleCommand(String[] command, Client client) throws IOException {
+        String res = "";
+        switch (command[0]){
+            case "PING":
+                res = commandHandler.ping(command);
+                break;
+            case "ECHO":
+                res = commandHandler.echo(command);
+                break;
+            case "SET":
+                res = commandHandler.set(command);
+                break;
         }
+        if(res !=null && !res.equals(""))
+            client.outputStream.write(res.getBytes());
     }
 }
