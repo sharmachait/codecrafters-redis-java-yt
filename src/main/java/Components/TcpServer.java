@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Component
-public class TcpServer {
+public class  TcpServer {
     @Autowired
     private RespSerializer respSerializer;
     @Autowired
