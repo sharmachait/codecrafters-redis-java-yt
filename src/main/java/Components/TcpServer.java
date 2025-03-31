@@ -83,6 +83,9 @@ public class  TcpServer {
             case "SET":
                 res = commandHandler.set(command);
                 break;
+            case "GET":
+                res = commandHandler.get(command);
+                break;
         }
         if(res !=null && !res.equals(""))
             client.outputStream.write(res.getBytes());
