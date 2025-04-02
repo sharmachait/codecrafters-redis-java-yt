@@ -3,6 +3,8 @@ package Components;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+
 @Component
 public class CommandHandler {
 
@@ -23,7 +25,15 @@ public class CommandHandler {
         try{
             String key = command[1];
             String value = command[2];
-            return store.set(key, value);
+
+            int pxFlag = Arrays.stream(command).toList().indexOf("px");
+            // -1
+            if(pxFlag > -1){
+                int delta = Integer.parseInt( command[ pxFlag + 1 ] );
+                return store.set(key, value, delta);
+            }else{
+                return store.set(key, value);
+            }
         }catch (Exception e){
             System.out.println(e.getMessage());
             return "$-1\r\n";
