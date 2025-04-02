@@ -17,10 +17,10 @@ public class  TcpServer {
     private RespSerializer respSerializer;
     @Autowired
     private CommandHandler commandHandler;
-    public void startServer(){
+    public void startServer(int port){
         ServerSocket serverSocket = null;
         Socket clientSocket = null;
-        int port = 6379;
+//        int port = 6379;
         try {
             serverSocket = new ServerSocket(port);
             serverSocket.setReuseAddress(true);
