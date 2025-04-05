@@ -64,7 +64,7 @@ public class  TcpServer {
         while(client.socket.isConnected()){
             byte[] buffer = new byte[client.socket.getReceiveBufferSize()];
             int bytesRead = client.inputStream.read(buffer);
-            System.out.println(bytesRead);
+
             if(bytesRead > 0){
                 // bytes parsing into strings
                 List<String[]> commands = respSerializer.deseralize(buffer);
@@ -90,6 +90,9 @@ public class  TcpServer {
                 break;
             case "GET":
                 res = commandHandler.get(command);
+                break;
+            case "INFO":
+                res = commandHandler.info(command);
                 break;
         }
         if(res !=null && !res.equals(""))
