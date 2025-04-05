@@ -1,5 +1,9 @@
-package Components;
+package Components.Server;
 
+import Components.Service.CommandHandler;
+import Components.Service.RespSerializer;
+import Infra.Client;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +15,7 @@ import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Component
 public class  TcpServer {
     @Autowired
@@ -44,14 +49,14 @@ public class  TcpServer {
             }
 
         } catch (IOException e) {
-            System.out.println("IOException: " + e.getMessage());
+            log.error("IOException: " + e.getMessage());
         } finally {
             try {
                 if (clientSocket != null) {
                     clientSocket.close();
                 }
             } catch (IOException e) {
-                System.out.println("IOException: " + e.getMessage());
+                log.error("IOException: " + e.getMessage());
             }
         }
     }

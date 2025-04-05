@@ -1,10 +1,13 @@
-package Components;
+package Components.Service;
 
+import Components.Repository.Store;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
+@Slf4j
 @Component
 public class CommandHandler {
 
@@ -35,7 +38,7 @@ public class CommandHandler {
                 return store.set(key, value);
             }
         }catch (Exception e){
-            System.out.println(e.getMessage());
+            log.error(e.getMessage());
             return "$-1\r\n";
         }
     }
@@ -45,7 +48,7 @@ public class CommandHandler {
             String key = command[1];
             return store.get(key);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            log.error(e.getMessage());
             return "$-1\r\n";
         }
     }

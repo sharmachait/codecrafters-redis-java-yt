@@ -1,4 +1,4 @@
-package Components;
+package Components.Service;
 
 import org.junit.jupiter.api.Test;
 

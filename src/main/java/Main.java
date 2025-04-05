@@ -1,7 +1,6 @@
-import Components.TcpServer;
+import Components.Server.TcpServer;
+import Config.AppConfig;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
-import java.util.Arrays;
 
 
 public class Main {
