@@ -1,15 +1,16 @@
 package Components.Service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-@Slf4j
 @Component
 public class RespSerializer {
+    private static final Logger logger = Logger.getLogger(RespSerializer.class.getName());
     public String serializeBulkString(String s){
         int length = s.length();
         String respHeader = "$"+length;
@@ -91,7 +92,7 @@ public class RespSerializer {
             }
             return res;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            logger.log(Level.SEVERE, e.getMessage());
         }
         return new ArrayList<>();
     }

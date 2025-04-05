@@ -1,18 +1,19 @@
 package Components.Repository;
 
 import Components.Service.RespSerializer;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-@Slf4j
 @Component
 public class Store {
+    private static final Logger logger = Logger.getLogger(Store.class.getName());
+
     public ConcurrentHashMap<String, Value> map;
     @Autowired
     public RespSerializer respSerializer;
@@ -30,7 +31,7 @@ public class Store {
             map.put(key, value);
             return "+OK\r\n";
         } catch (Exception e) {
-            log.error(e.getMessage());
+            logger.log(Level.SEVERE, e.getMessage());
             return "$-1\r\n";
         }
     }
@@ -43,7 +44,7 @@ public class Store {
             map.put(key, value);
             return "+OK\r\n";
         } catch (Exception e) {
-            log.error(e.getMessage());
+            logger.log(Level.SEVERE, e.getMessage());
             return "$-1\r\n";
         }
     }
@@ -59,7 +60,7 @@ public class Store {
             }
             return respSerializer.serializeBulkString(value.val);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            logger.log(Level.SEVERE, e.getMessage());
             return "$-1\r\n";
         }
     }

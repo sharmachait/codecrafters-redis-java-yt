@@ -3,16 +3,16 @@ package Components.Service;
 import Components.Server.RedisConfig;
 import Components.Server.TcpServer;
 import Config.AppConfig;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.ApplicationContext;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Slf4j
 @SpringBootTest(classes = AppConfig.class)
 public class CommandHandlerTest {
 
@@ -20,14 +20,21 @@ public class CommandHandlerTest {
     CommandHandler commandHandler;
 
     @BeforeAll
-    public static void setUp(){
-        AnnotationConfigApplicationContext context =
-                new AnnotationConfigApplicationContext(AppConfig.class);
-        TcpServer app = context.getBean(TcpServer.class);
+    public static void setUp(@Autowired ApplicationContext context) throws InterruptedException {
+
         RedisConfig redisConfig = context.getBean(RedisConfig.class);
+
         redisConfig.setPort(6379);
         redisConfig.setRole("master");
-        app.startServer(6379);
+
+        TcpServer app = context.getBean(TcpServer.class);
+
+        CompletableFuture.runAsync(()->{
+            app.startServer(6379);
+        });
+
+        Thread.sleep(1000);
+
     }
 
     @Test

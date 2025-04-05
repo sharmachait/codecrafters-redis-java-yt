@@ -2,16 +2,16 @@ package Components.Service;
 
 import Components.Repository.Store;
 import Components.Server.RedisConfig;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-@Slf4j
 @Component
 public class CommandHandler {
-
+    private static final Logger logger = Logger.getLogger(CommandHandler.class.getName());
     @Autowired
     public RespSerializer respSerializer;
 
@@ -42,7 +42,7 @@ public class CommandHandler {
                 return store.set(key, value);
             }
         }catch (Exception e){
-            log.error(e.getMessage());
+            logger.log(Level.SEVERE, e.getMessage());
             return "$-1\r\n";
         }
     }
@@ -52,7 +52,7 @@ public class CommandHandler {
             String key = command[1];
             return store.get(key);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            logger.log(Level.SEVERE, e.getMessage());
             return "$-1\r\n";
         }
     }
@@ -61,7 +61,7 @@ public class CommandHandler {
         // command[0]; info
         int replication = Arrays.stream(command).toList().indexOf("replication");
         if(replication > -1){
-            return respSerializer.serializeBulkString("role:"+redisConfig.role);
+            return respSerializer.serializeBulkString("role:"+redisConfig.getRole());
         }
         return "";
     }

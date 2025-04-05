@@ -1,9 +1,9 @@
 package Components.Server;
 
+import Components.Repository.Store;
 import Components.Service.CommandHandler;
 import Components.Service.RespSerializer;
 import Infra.Client;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +14,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-@Slf4j
 @Component
 public class  TcpServer {
+    private static final Logger logger = Logger.getLogger(TcpServer.class.getName());
     @Autowired
     private RespSerializer respSerializer;
     @Autowired
@@ -49,14 +51,14 @@ public class  TcpServer {
             }
 
         } catch (IOException e) {
-            log.error("IOException: " + e.getMessage());
+            logger.log(Level.SEVERE, e.getMessage());
         } finally {
             try {
                 if (clientSocket != null) {
                     clientSocket.close();
                 }
             } catch (IOException e) {
-                log.error("IOException: " + e.getMessage());
+                logger.log(Level.SEVERE, e.getMessage());
             }
         }
     }
