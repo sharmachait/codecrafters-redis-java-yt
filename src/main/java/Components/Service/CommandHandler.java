@@ -61,7 +61,15 @@ public class CommandHandler {
         // command[0]; info
         int replication = Arrays.stream(command).toList().indexOf("replication");
         if(replication > -1){
-            return respSerializer.serializeBulkString("role:"+redisConfig.getRole());
+            String role = "role:"+redisConfig.getRole();
+            String masterReplId = "master_replid:"+redisConfig.getMasterReplId();
+            String masterReplOffset = "master_repl_offset:"+redisConfig.getMasterReplOffset();
+
+            String []info = new String[]{role, masterReplId, masterReplOffset};
+
+            String replicationData = String.join("\r\n", info);
+
+            return respSerializer.serializeBulkString(replicationData);
         }
         return "";
     }
