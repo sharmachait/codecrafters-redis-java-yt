@@ -76,10 +76,30 @@ public class SlaveTcpServer {
             OutputStream outputStream = master.getOutputStream();
             byte[] inputBuffer = new byte[1024];
 
+            //part 1 of the handshake
             byte[] data = "*1\r\n$4\r\nPING\r\n".getBytes();
             outputStream.write(data);
             int bytesRead = inputStream.read(inputBuffer,0,inputBuffer.length);
             String response = new String(inputBuffer,0,bytesRead, StandardCharsets.UTF_8);
+            logger.log(Level.FINE, response);
+
+            //part 2 of the handshake
+            int lenListeningPort = (redisConfig.getPort()+"").length();
+            int listeningPort = redisConfig.getPort();
+            String replconf = "*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$" +
+                    (lenListeningPort+"") + "\r\n" + (listeningPort+"") +
+                    "\r\n";
+            data = replconf.getBytes();
+            outputStream.write(data);
+            bytesRead = inputStream.read(inputBuffer,0,inputBuffer.length);
+            response = new String(inputBuffer,0,bytesRead, StandardCharsets.UTF_8);
+            logger.log(Level.FINE, response);
+
+            replconf = "*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n";
+            data = replconf.getBytes();
+            outputStream.write(data);
+            bytesRead = inputStream.read(inputBuffer,0,inputBuffer.length);
+            response = new String(inputBuffer,0,bytesRead, StandardCharsets.UTF_8);
             logger.log(Level.FINE, response);
 
 
