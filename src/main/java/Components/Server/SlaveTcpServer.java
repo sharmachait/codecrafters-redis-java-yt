@@ -109,6 +109,7 @@ public class SlaveTcpServer {
             bytesRead = inputStream.read(inputBuffer,0,inputBuffer.length);
             response = new String(inputBuffer,0,bytesRead, StandardCharsets.UTF_8);
             logger.log(Level.FINE, response);
+            System.out.println(response);
 
 //            handlePsyncResponse(inputStream);
 
