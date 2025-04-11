@@ -102,6 +102,15 @@ public class SlaveTcpServer {
             response = new String(inputBuffer,0,bytesRead, StandardCharsets.UTF_8);
             logger.log(Level.FINE, response);
 
+            // part 3 of the handshake
+            String psync = "*3\r\n$5\r\nPSYNC\r\n$1\r\n?\r\n$2\r\n-1\r\n";
+            data = psync.getBytes();
+            outputStream.write(data);
+            bytesRead = inputStream.read(inputBuffer,0,inputBuffer.length);
+            response = new String(inputBuffer,0,bytesRead, StandardCharsets.UTF_8);
+            logger.log(Level.FINE, response);
+
+//            handlePsyncResponse(inputStream);
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
