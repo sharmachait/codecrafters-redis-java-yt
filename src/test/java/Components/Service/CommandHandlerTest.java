@@ -1,7 +1,7 @@
 //package Components.Service;
 //
 //import Components.Server.RedisConfig;
-//import Components.Server.TcpServer;
+//import Components.Server.MasterTcpServer;
 //import Config.AppConfig;
 //import org.junit.jupiter.api.BeforeAll;
 //import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@
 //        redisConfig.setPort(6379);
 //        redisConfig.setRole("master");
 //
-//        TcpServer app = context.getBean(TcpServer.class);
+//        MasterTcpServer app = context.getBean(MasterTcpServer.class);
 //
 //        CompletableFuture.runAsync(()->{
 //            app.startServer(6379);
