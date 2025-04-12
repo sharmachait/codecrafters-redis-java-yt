@@ -1,5 +1,8 @@
 package Components.Service;
 
+import Components.Infra.Client;
+import Components.Infra.ConnectionPool;
+import Components.Infra.Slave;
 import Components.Repository.Store;
 import Components.Server.RedisConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,9 @@ public class CommandHandler {
 
     @Autowired
     public RedisConfig redisConfig;
+
+    @Autowired
+    public ConnectionPool connectionPool;
 
     public String ping(String[] command){
         return "+PONG\r\n";
@@ -74,4 +80,31 @@ public class CommandHandler {
         return "";
     }
 
+    public String replconf(String[] command, Client client) {
+        switch (command[1]){
+            case "listening-port":
+
+                connectionPool.removeClient(client);
+                Slave s = new Slave(client);
+                connectionPool.addSlave(s);
+                return "+OK\r\n";
+
+            case "capa":
+                Slave slave = null;
+                for(Slave ss: connectionPool.getSlaves()){
+                    if(ss.connection.equals(client)){
+                        slave = ss;
+                        break;
+                    }
+                }
+                for(int i=0; i<command.length; i++){
+                    if(command[i].equals("capa")){
+                        slave.capabilities.add(command[i+1]);
+                    }
+                }
+                return "+OK\r\n";
+        }
+
+        return "+OK\r\n";
+    }
 }
