@@ -158,8 +158,8 @@ public class SlaveTcpServer {
             case "INFO":
                 res = commandHandler.info(command);
                 break;
-            case "REPLCONF":
-                res = commandHandler.replconf(command, client);
+            case "PSYNC":
+                res = commandHandler.psync(command);
                 break;
         }
         if(res !=null && !res.equals(""))
