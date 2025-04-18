@@ -8,8 +8,14 @@ import Components.Server.RedisConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -139,5 +145,40 @@ public class CommandHandler {
             return new ResponseDto("Options not supported yet.");
         }
 
+    }
+    public void sendCommandToSlaves(Queue<Slave> slaves, String[] command){
+        for(Slave slave : slaves){
+            String commandRespString = respSerializer.respArray(command);
+            try {
+                slave.send(commandRespString.getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public String handleCommandsFromMaster(String[] command, Socket ConnectionWithMaster) {
+        String cmd = command[0];
+        String res = "";
+        switch (cmd)
+        {
+            case "SET":
+                res = store.set(command[1], command[2]);
+                CompletableFuture.runAsync(()->sendCommandToSlaves(connectionPool.getSlaves(),command));
+                break;
+
+            case "PING":
+                break;
+//
+//            case "REPLCONF":
+//                res = ReplConfSlave(command);
+//                break;
+
+            default:
+                res = "+No Response\r\n";
+                break;
+        }
+
+        return res;
     }
 }

@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -110,16 +111,57 @@ public class SlaveTcpServer {
             String psync = "*3\r\n$5\r\nPSYNC\r\n$1\r\n?\r\n$2\r\n-1\r\n";
             data = psync.getBytes();
             outputStream.write(data);
-            bytesRead = inputStream.read(inputBuffer,0,inputBuffer.length);
-            response = new String(inputBuffer,0,bytesRead, StandardCharsets.UTF_8);
-            logger.log(Level.FINE, response);
-            System.out.println(response);
+            List<Integer> psyncResponse = handlePsyncResponse(inputStream);
 
-//            handlePsyncResponse(inputStream);
+            while(master.isConnected()){
+                int offset = 1;
+                StringBuilder sb = new StringBuilder();
+                List<Byte> bytes = new ArrayList<>();
+
+                while(true){
+                    int b = inputStream.read();
+                    if(b==(int)'*')
+                        break;
+
+                    offset++;
+                    bytes.add((byte)b);
+
+                    if(inputStream.available()<=0)
+                        break;
+                }
+
+                for(Byte b : bytes)
+                    sb.append((char)(b.byteValue() & 0xFF));
+
+                if(bytes.isEmpty())
+                    continue;
+                String command = sb.toString();
+                String[] parts = command.split("\r\n");
+                if (command.equals("+OK\r\n"))
+                    continue;
+                String[] commandArray = respSerializer.parseArray(parts);
+
+                String res = commandHandler.handleCommandsFromMaster(commandArray,master);
+            }
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
         }
+    }
+
+    private List<Integer> handlePsyncResponse(InputStream inputStream) throws IOException {
+        List<Integer> psyncResponse = new ArrayList<>();
+        while(true){
+            if(inputStream.available()<=0)
+                continue;
+
+            int b = inputStream.read();
+            psyncResponse.add(b);
+            if(b==(int)'*'){
+                break;
+            }
+        }
+        return psyncResponse;
     }
 
     private void handleClient(Client client) throws IOException {

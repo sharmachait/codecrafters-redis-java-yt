@@ -3,23 +3,25 @@ package Components.Infra;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
 public class ConnectionPool {
-    private Set<Client> clients;
-    private Set<Slave> slaves;
+    private Queue<Client> clients;
+    private Queue<Slave> slaves;
 
     public ConnectionPool() {
-        clients = new HashSet<>();
-        slaves = new HashSet<>();
+        clients = new ConcurrentLinkedQueue<>();
+        slaves = new ConcurrentLinkedQueue<>();
     }
 
-    public Set<Client> getClients() {
+    public Queue<Client> getClients() {
         return clients;
     }
 
-    public Set<Slave> getSlaves() {
+    public Queue<Slave> getSlaves() {
         return slaves;
     }
 

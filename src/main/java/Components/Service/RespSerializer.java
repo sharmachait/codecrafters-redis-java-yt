@@ -42,6 +42,21 @@ public class RespSerializer {
         return i;
     }
 
+    public String[] parseArray(String[] parts){
+        String len = parts[0];
+        int length = Integer.parseInt(len);
+        String[] _command = new String[length];
+        _command[0]=parts[2].toLowerCase();
+        int idx = 1;
+        for(int i = 4; i<parts.length; i += 2){
+            _command[idx++] = parts[i];
+        }
+        return _command;
+    }
+    public String RespBulkString(String response){
+        return "$" + response.length() + "\r\n" + response + "\r\n";
+    }
+
     public List<String[]> deseralize(byte[] command){
         try{
             String data = new String(command, StandardCharsets.UTF_8);
