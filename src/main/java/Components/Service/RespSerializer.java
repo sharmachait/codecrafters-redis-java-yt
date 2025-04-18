@@ -96,4 +96,17 @@ public class RespSerializer {
         }
         return new ArrayList<>();
     }
+
+    public String respArray(String[] a){
+        List<String> res = new ArrayList<String>();
+
+        int len = a.length;
+
+        res.add("*"+len);
+        for(String e : a){
+            res.add("$" + e.length());
+            res.add(e);
+        }
+        return String.join("\r\n", res) + "\r\n";
+    }
 }
