@@ -119,6 +119,12 @@ public class RespSerializer {
         for(int i=4; i< parts.length; i++){
             _command[idx++] = parts[i];
         }
+
+        System.out.println("--------------------------------------------------------------------------------------------------");
+        for(String s: _command){
+            System.out.print(s +" ");
+        }
+        System.out.println("--------------------------------------------------------------------------------------------------");
         return _command;
     }
 }

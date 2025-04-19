@@ -146,11 +146,7 @@ public class SlaveTcpServer {
 
 
                 String[] commandArray = respSerializer.parseArray(parts);
-                System.out.println("--------------------------------------------------------------------------------------------------");
-                for(String s: commandArray){
-                    System.out.print(s +" ");
-                }
-                System.out.println("--------------------------------------------------------------------------------------------------");
+
                 String commandResult = handleCommandFromMaster(commandArray, master);
             }
 
