@@ -144,7 +144,7 @@ public class SlaveTcpServer {
                 if (command.equals("+OK\r\n"))
                     continue;
                 String[] commandArray = respSerializer.parseArray(parts);
-                System.out.println("Slave received: " +Arrays.stream(commandArray).toList());
+
                 String res = handleCommandsFromMaster(commandArray,master);
             }
 
@@ -155,10 +155,12 @@ public class SlaveTcpServer {
 
     public String handleCommandsFromMaster(String[] command, Socket ConnectionWithMaster) {
         String cmd = command[0];
+        cmd = cmd.toUpperCase();
         String res = "";
         switch (cmd)
         {
             case "SET":
+                System.out.println("Slave received: " +Arrays.stream(command).toList());
                 res = commandHandler.set(command);
 //                CompletableFuture.runAsync(()->sendCommandToSlaves(connectionPool.getSlaves(),command));
                 break;
