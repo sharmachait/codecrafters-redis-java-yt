@@ -162,7 +162,10 @@ public class SlaveTcpServer {
 
     private String handleCommandFromMaster(String[] command, Socket master) {
         String cmd = command[0];
+        System.out.println("========================================================================================================");
+
         cmd = cmd.toUpperCase();
+        System.out.println(cmd);
         String res = "";
         switch (cmd){
             case "SET":
