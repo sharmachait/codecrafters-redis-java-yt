@@ -115,7 +115,7 @@ public class RespSerializer {
         int length = Integer.parseInt(len);
 
         String _command[] = new String[length];
-
+        _command[0] = "ping";
         int idx = 1;
         System.out.println("--------------------------------------------------------------------------------------------------");
         for(String s: parts){
