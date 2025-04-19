@@ -112,6 +112,7 @@ public class RespSerializer {
     public String[] parseArray(String[] parts) {
         String len = parts[0];
         int length = Integer.parseInt(len);
+        System.out.println(length);
         String _command[] = new String[length];
         int idx = 0;
         _command[idx++] = parts[2];
@@ -120,7 +121,7 @@ public class RespSerializer {
             System.out.print(s +" ");
         }
         System.out.println("--------------------------------------------------------------------------------------------------");
-        for(int i=4; i< parts.length; i++){
+        for(int i=4; i < parts.length; i++){
             _command[idx++] = parts[i];
         }
 
