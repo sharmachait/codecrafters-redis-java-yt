@@ -145,7 +145,7 @@ public class SlaveTcpServer {
                     continue;
                 System.out.println("--------------------------------------------------------------------------------------------------");
                 for(String s: parts){
-                    System.out.print(s);
+                    System.out.print(s +" ");
                 }
                 System.out.println("--------------------------------------------------------------------------------------------------");
 
