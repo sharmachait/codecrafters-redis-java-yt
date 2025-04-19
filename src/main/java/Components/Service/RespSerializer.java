@@ -108,4 +108,20 @@ public class RespSerializer {
         }
         return String.join("\r\n",res)+"\r\n";
     }
+
+    public String[] parseArray(String[] parts) {
+        String len = parts[0];
+
+        int length = Integer.parseInt(len);
+
+        String _command[] = new String[length];
+
+        int idx = 1;
+        System.out.println("--------------------------------------------------------------------------------------------------");
+        for(String s: parts){
+            System.out.print(s);
+        }
+
+        return _command;
+    }
 }
