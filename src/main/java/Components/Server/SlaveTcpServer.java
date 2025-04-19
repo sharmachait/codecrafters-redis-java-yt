@@ -16,6 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -139,10 +140,11 @@ public class SlaveTcpServer {
                     continue;
                 String command = sb.toString();
                 String[] parts = command.split("\r\n");
+
                 if (command.equals("+OK\r\n"))
                     continue;
                 String[] commandArray = respSerializer.parseArray(parts);
-
+                System.out.println("Slave received: " +Arrays.stream(commandArray).toList());
                 String res = handleCommandsFromMaster(commandArray,master);
             }
 
