@@ -26,6 +26,8 @@ public class Store {
     }
 
     public String set(String key, String val){
+        System.out.println("...............................................................................");
+        System.out.println("setting value for key"+" key: "+key+" val: "+val);
         try{
             Value value = new Value(val, LocalDateTime.now(), LocalDateTime.MAX);
             map.put(key, value);
@@ -54,7 +56,7 @@ public class Store {
             LocalDateTime now = LocalDateTime.now();
             Value value = map.get(key);
 
-            if(value.expiry!=null && value.expiry.isBefore(now)){
+            if(value!=null && value.expiry.isBefore(now)){
                 map.remove(key);
                 return "$-1\r\n";
             }
