@@ -46,7 +46,7 @@ public class CommandHandler {
         try{
             String key = command[1];
             String value = command[2];
-            System.out.println("...............................................................................");
+
 
             int pxFlag = Arrays.stream(command).toList().indexOf("px");
             // -1
@@ -147,39 +147,7 @@ public class CommandHandler {
         }
 
     }
-    public void sendCommandToSlaves(Queue<Slave> slaves, String[] command){
-        for(Slave slave : slaves){
-            String commandRespString = respSerializer.respArray(command);
-            try {
-                slave.send(commandRespString.getBytes());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
 
-    public String handleCommandsFromMaster(String[] command, Socket ConnectionWithMaster) {
-        String cmd = command[0];
-        String res = "";
-        switch (cmd)
-        {
-            case "SET":
-                res = set(command);
-                CompletableFuture.runAsync(()->sendCommandToSlaves(connectionPool.getSlaves(),command));
-                break;
 
-            case "PING":
-                break;
-//
-//            case "REPLCONF":
-//                res = ReplConfSlave(command);
-//                break;
 
-            default:
-                res = "+No Response\r\n";
-                break;
-        }
-
-        return res;
-    }
 }

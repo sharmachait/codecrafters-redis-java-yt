@@ -1,6 +1,7 @@
 package Components.Server;
 
 import Components.Infra.ConnectionPool;
+import Components.Infra.Slave;
 import Components.Service.CommandHandler;
 import Components.Service.RespSerializer;
 import Components.Infra.Client;
@@ -16,6 +17,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -141,11 +143,41 @@ public class SlaveTcpServer {
                     continue;
                 String[] commandArray = respSerializer.parseArray(parts);
 
-                String res = commandHandler.handleCommandsFromMaster(commandArray,master);
+                String res = handleCommandsFromMaster(commandArray,master);
             }
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
+        }
+    }
+
+    public String handleCommandsFromMaster(String[] command, Socket ConnectionWithMaster) {
+        String cmd = command[0];
+        String res = "";
+        switch (cmd)
+        {
+            case "SET":
+                res = commandHandler.set(command);
+//                CompletableFuture.runAsync(()->sendCommandToSlaves(connectionPool.getSlaves(),command));
+                break;
+
+            case "PING":
+                break;
+            default:
+                res = "+No Response\r\n";
+                break;
+        }
+
+        return res;
+    }
+    public void sendCommandToSlaves(Queue<Slave> slaves, String[] command){
+        for(Slave slave : slaves){
+            String commandRespString = respSerializer.respArray(command);
+            try {
+                slave.send(commandRespString.getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
