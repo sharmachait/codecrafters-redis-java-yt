@@ -167,6 +167,5 @@ public class SlaveTcpServer {
                 break;
         }
         client.send(res, data);
-
     }
 }
