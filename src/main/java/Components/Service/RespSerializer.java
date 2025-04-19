@@ -111,14 +111,14 @@ public class RespSerializer {
 
     public String[] parseArray(String[] parts) {
         String len = parts[0];
-
         int length = Integer.parseInt(len);
-
         String _command[] = new String[length];
-        _command[0] = "ping";
-        int idx = 1;
+        int idx = 0;
+        _command[idx++] = parts[2];
 
-
+        for(int i=4; i< parts.length; i++){
+            _command[idx++] = parts[i];
+        }
         return _command;
     }
 }
