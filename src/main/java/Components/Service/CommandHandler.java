@@ -62,6 +62,9 @@ public class CommandHandler {
     }
 
     public String get(String[] command){
+        System.out.println("=============================== command from client ====================================");
+        for(String c:  command)
+            System.out.print(c+" ");
         try{
             String key = command[1];
             return store.get(key);
@@ -161,13 +164,12 @@ public class CommandHandler {
         System.out.println("``````````````````````````````````command from master```````````````````````````````````````");
         for(String c:  command)
             System.out.print(c+" ");
-        System.out.println("``````````````````````````````````command from master```````````````````````````````````````");
         String cmd = command[0];
         String res = "";
         switch (cmd)
         {
             case "SET":
-                res = store.set(command[1], command[2]);
+                res = set(command);
                 CompletableFuture.runAsync(()->sendCommandToSlaves(connectionPool.getSlaves(),command));
                 break;
 
