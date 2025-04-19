@@ -166,8 +166,10 @@ public class SlaveTcpServer {
         String res = "";
         switch (cmd){
             case "SET":
+                System.out.println("========================================================================================================");
+                System.out.println("calling the set command");
                 commandHandler.set(command);
-                CompletableFuture.runAsync(()->propagate(command));
+//                CompletableFuture.runAsync(()->propagate(command));
                 break;
         }
         return res;
