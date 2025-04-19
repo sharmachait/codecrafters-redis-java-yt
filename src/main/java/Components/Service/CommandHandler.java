@@ -158,6 +158,9 @@ public class CommandHandler {
     }
 
     public String handleCommandsFromMaster(String[] command, Socket ConnectionWithMaster) {
+        System.out.println("``````````````````````````````````command from master```````````````````````````````````````");
+        System.out.println(command[0]);
+        System.out.println("``````````````````````````````````command from master```````````````````````````````````````");
         String cmd = command[0];
         String res = "";
         switch (cmd)
