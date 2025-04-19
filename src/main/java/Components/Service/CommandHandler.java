@@ -46,6 +46,7 @@ public class CommandHandler {
         try{
             String key = command[1];
             String value = command[2];
+            System.out.println("...............................................................................");
 
             int pxFlag = Arrays.stream(command).toList().indexOf("px");
             // -1
@@ -62,9 +63,6 @@ public class CommandHandler {
     }
 
     public String get(String[] command){
-        System.out.println("=============================== command from client ====================================");
-        for(String c:  command)
-            System.out.print(c+" ");
         try{
             String key = command[1];
             return store.get(key);
@@ -161,9 +159,6 @@ public class CommandHandler {
     }
 
     public String handleCommandsFromMaster(String[] command, Socket ConnectionWithMaster) {
-        System.out.println("``````````````````````````````````command from master```````````````````````````````````````");
-        for(String c:  command)
-            System.out.print(c+" ");
         String cmd = command[0];
         String res = "";
         switch (cmd)
