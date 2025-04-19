@@ -114,18 +114,17 @@ public class RespSerializer {
         int length = Integer.parseInt(len);
         System.out.println(length);
         String _command[] = new String[length];
-        int idx = 0;
-        _command[idx++] = parts[2];
+
+        _command[0] = parts[2];
         System.out.println("--------------------------------------------------------------------------------------------------");
         for(String s: parts){
             System.out.print(s +" ");
         }
         System.out.println("--------------------------------------------------------------------------------------------------");
-        for(int i=4; i < parts.length; i++){
+        int idx = 1;
+        for(int i=4; i < parts.length; i+=2){
             _command[idx++] = parts[i];
         }
-
-
         return _command;
     }
 }
