@@ -117,10 +117,6 @@ public class RespSerializer {
 
         _command[0] = parts[2];
 
-        for(String s: parts){
-            System.out.print(s +" ");
-        }
-
         int idx = 1;
         for(int i=4; i < parts.length; i+=2){
             _command[idx++] = parts[i];

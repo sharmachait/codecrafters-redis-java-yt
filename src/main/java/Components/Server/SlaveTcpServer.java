@@ -192,7 +192,7 @@ public class SlaveTcpServer {
                 CompletableFuture.runAsync(()->propagate(command));
                 break;
             case "REPLCONF":
-                commandHandler.replconf(command, master);
+                res = commandHandler.replconf(command, master);
                 break;
         }
         return res;
