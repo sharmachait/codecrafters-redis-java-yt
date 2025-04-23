@@ -149,15 +149,13 @@ public class SlaveTcpServer {
 
 
                 String[] commandArray = respSerializer.parseArray(parts);
-                System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-                for(String c: commandArray)
-                    System.out.print(c+" ");
-                System.out.println();
-                System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
                 Client masterClient = new Client(master, master.getInputStream(), master.getOutputStream(), -1);
                 String commandResult = handleCommandFromMaster(commandArray, masterClient);
 
                 if(commandArray.length >= 2 && commandArray[0].equals("REPLCONF") && commandArray[1].equals("GETACK")){
+                    System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+                    System.out.println(commandResult);
+                    System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
                     outputStream.write(commandResult.getBytes());
                     offset++;
                     List<Byte> leftOverBytes = new ArrayList<>();
@@ -174,9 +172,6 @@ public class SlaveTcpServer {
                     for(Byte b: leftOverBytes){
                         leftOverSb.append((char)(b.byteValue() & 0xFF));
                     }
-                    System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-                    System.out.println(leftOverSb);
-                    System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
                 }
                 redisConfig.setMasterReplOffset(offset + redisConfig.getMasterReplOffset());
             }
