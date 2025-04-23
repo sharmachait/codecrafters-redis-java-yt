@@ -88,6 +88,11 @@ public class CommandHandler {
             case "GETACK":
                 String [] replconfAck = new String[]{"REPLCONF", "ACK", redisConfig.getMasterReplOffset()+""};
                 return respSerializer.respArray(replconfAck);
+//            case "ACK":
+//                int ackResponse = Integer.parseInt(command[2]);
+//                connectionPool.slaveAck(ackResponse);
+//                String [] replconfAck = new String[]{"REPLCONF", "ACK", redisConfig.getMasterReplOffset()+""};
+//                return respSerializer.respArray(replconfAck);
             case "listening-port":
                 connectionPool.removeClient(client);
                 Slave s = new Slave(client);
