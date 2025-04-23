@@ -42,7 +42,7 @@ public class SlaveTcpServer {
             serverSocket.setReuseAddress(true);
 
             CompletableFuture<Void> slaveConnectionFuture = CompletableFuture.runAsync(this::initiateSlavery);
-            slaveConnectionFuture.thenRun(()->System.out.println("Replication complted"));
+            slaveConnectionFuture.thenRun(()->System.out.println("Replication completed"));
 
             int id = 0;
             while (true) {
@@ -115,6 +115,9 @@ public class SlaveTcpServer {
 
             List<Integer> res = handlePsyncResponse(inputStream);
 
+            // number of bytes in the input stream coming down from the master after this point, if they are read and the command is proccessed we can add
+            // the number of bytes processes to the offset
+
             while(master.isConnected()){
                 int offset = 1;
                 StringBuilder sb = new StringBuilder();
@@ -146,29 +149,55 @@ public class SlaveTcpServer {
 
 
                 String[] commandArray = respSerializer.parseArray(parts);
+                System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+                for(String c: commandArray)
+                    System.out.print(c+" ");
+                System.out.println();
+                System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+                Client masterClient = new Client(master, master.getInputStream(), master.getOutputStream(), -1);
+                String commandResult = handleCommandFromMaster(commandArray, masterClient);
 
-                String commandResult = handleCommandFromMaster(commandArray, master);
+                if(commandArray.length >= 2 && commandArray[0].equals("REPLCONF") && commandArray[1].equals("GETACK")){
+                    outputStream.write(commandResult.getBytes());
+                    offset++;
+                    List<Byte> leftOverBytes = new ArrayList<>();
+                    while(true){
+                        if(inputStream.available()<=0)
+                            break;
+                        byte b = (byte)inputStream.read();
+                        leftOverBytes.add(b);
+                        if((int) b == (int)'*')
+                            break;
+                        offset++;
+                    }
+                    StringBuilder leftOverSb = new StringBuilder();
+                    for(Byte b: leftOverBytes){
+                        leftOverSb.append((char)(b.byteValue() & 0xFF));
+                    }
+                    System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                    System.out.println(leftOverSb);
+                    System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+                }
+                redisConfig.setMasterReplOffset(offset + redisConfig.getMasterReplOffset());
             }
-
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage());
         }
     }
 
-    private String handleCommandFromMaster(String[] command, Socket master) {
+    private String handleCommandFromMaster(String[] command, Client master) {
         String cmd = command[0];
-        System.out.println("========================================================================================================");
-
         cmd = cmd.toUpperCase();
-        System.out.println(cmd);
+
         String res = "";
         switch (cmd){
             case "SET":
-                System.out.println("========================================================================================================");
-                System.out.println("calling the set command");
                 commandHandler.set(command);
-//                CompletableFuture.runAsync(()->propagate(command));
+                CompletableFuture.runAsync(()->propagate(command));
+                break;
+            case "REPLCONF":
+                commandHandler.replconf(command, master);
                 break;
         }
         return res;
