@@ -8,8 +8,12 @@ import Components.Server.RedisConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -88,11 +92,10 @@ public class CommandHandler {
             case "GETACK":
                 String [] replconfAck = new String[]{"REPLCONF", "ACK", redisConfig.getMasterReplOffset()+""};
                 return respSerializer.respArray(replconfAck);
-//            case "ACK":
-//                int ackResponse = Integer.parseInt(command[2]);
-//                connectionPool.slaveAck(ackResponse);
-//                String [] replconfAck = new String[]{"REPLCONF", "ACK", redisConfig.getMasterReplOffset()+""};
-//                return respSerializer.respArray(replconfAck);
+            case "ACK":
+                int ackResponse = Integer.parseInt(command[2]);
+                connectionPool.slaveAck(ackResponse);
+                break;
             case "listening-port":
                 connectionPool.removeClient(client);
                 Slave s = new Slave(client);
@@ -141,11 +144,45 @@ public class CommandHandler {
             String fullResyncHeader = "$"+ length +"\r\n";
             byte[] header = fullResyncHeader.getBytes();
 
+            connectionPool.slavesThatAreCaughtUp++;
 
             return new ResponseDto(res, concatenate(header, rdbFileData));
         }else{
             return new ResponseDto("Options not supported yet.");
         }
 
+    }
+
+    public String wait(String[] command, Instant now) {
+        String[] getAckArr = new String[] {"REPLCONF", "GETACK", "*"};
+        String getAck = respSerializer.respArray(getAckArr);
+        byte[] bytes = getAck.getBytes();
+        int bufferSize = bytes.length;
+
+        int required = Integer.parseInt(command[1]); // number of slaves we are required to wait for
+        int time = Integer.parseInt(command[2]);
+
+        for(Slave slave: connectionPool.getSlaves()){
+            CompletableFuture.runAsync(()->{
+                try {
+                    slave.connection.send(bytes);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+
+        int res = 0;
+        while(true){
+            if(Duration.between(now, Instant.now()).toMillis() >= time)
+                break;
+            if(res>=required)
+                break;
+            res = connectionPool.slavesThatAreCaughtUp;
+        }
+        connectionPool.bytesSentToSlaves+=bufferSize;
+        if(res>required)
+            return respSerializer.respInteger(required);
+        return respSerializer.respInteger(res);
     }
 }
