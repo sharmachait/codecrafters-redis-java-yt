@@ -102,7 +102,7 @@ public class MasterTcpServer {
                 res = commandHandler.set(command);
                 String respArr = respSerializer.respArray(command);
                 byte[] bytes = respArr.getBytes();
-                connectionPool.bytesSentToSlaves+=bytes.length;
+                connectionPool.bytesSentToSlaves += bytes.length;
                 CompletableFuture.runAsync(()->propagate(command));
                 break;
             case "GET":

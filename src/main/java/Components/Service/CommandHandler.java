@@ -153,20 +153,22 @@ public class CommandHandler {
 
     }
 
-    public String wait(String[] command, Instant now) {
-        String[] getAckArr = new String[] {"REPLCONF", "GETACK", "*"};
-        String getAck = respSerializer.respArray(getAckArr);
-        byte[] bytes = getAck.getBytes();
-        int bufferSize = bytes.length;
+    public String wait(String[] command, Instant start) {
+        String[] getackarr = new String[] { "REPLCONF", "GETACK", "*" };
+        String getack = respSerializer.respArray(getackarr);
+        byte[] bytearr = getack.getBytes();
+        int bufferSize = bytearr.length;
 
-        int required = Integer.parseInt(command[1]); // number of slaves we are required to wait for
+        int required = Integer.parseInt(command[1]);
         int time = Integer.parseInt(command[2]);
 
         for(Slave slave: connectionPool.getSlaves()){
             CompletableFuture.runAsync(()->{
                 try {
-                    slave.connection.send(bytes);
+
+                    slave.connection.send(getack.getBytes());
                 } catch (IOException e) {
+                    e.printStackTrace();
                     throw new RuntimeException(e);
                 }
             });
@@ -174,14 +176,14 @@ public class CommandHandler {
 
         int res = 0;
         while(true){
-            if(Duration.between(now, Instant.now()).toMillis() >= time)
-                break;
             if(res>=required)
                 break;
-            res = connectionPool.slavesThatAreCaughtUp;
+            if(Duration.between(start, Instant.now()).toMillis() >= time)
+                break;
+            res= connectionPool.slavesThatAreCaughtUp;
         }
         connectionPool.bytesSentToSlaves+=bufferSize;
-        if(res>required)
+        if(res > required)
             return respSerializer.respInteger(required);
         return respSerializer.respInteger(res);
     }
