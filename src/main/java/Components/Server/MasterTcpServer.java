@@ -80,6 +80,10 @@ public class MasterTcpServer {
                 List<String[]> commands = respSerializer.deseralize(buffer);
 
                 for(String[] command :commands){
+                    System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+                    System.out.println(String.join(" ", command));
+                    System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+                    System.out.println();
                     handleCommand(command, client);
                 }
             }
@@ -100,9 +104,9 @@ public class MasterTcpServer {
                 break;
             case "SET":
                 res = commandHandler.set(command);
-                String respArr = respSerializer.respArray(command);
-                byte[] bytes = respArr.getBytes();
-                connectionPool.bytesSentToSlaves += bytes.length;
+                String commandRespString = respSerializer.respArray(command);
+                byte[] toCount = commandRespString.getBytes();
+                connectionPool.bytesSentToSlaves += toCount.length;
                 CompletableFuture.runAsync(()->propagate(command));
                 break;
             case "GET":
@@ -115,12 +119,12 @@ public class MasterTcpServer {
                 res = commandHandler.replconf(command, client);
                 break;
             case "WAIT":
-                if(connectionPool.bytesSentToSlaves == 0 ){
+                if(connectionPool.bytesSentToSlaves == 0){
                     res = respSerializer.respInteger(connectionPool.slavesThatAreCaughtUp);
                     break;
                 }
-                Instant now = Instant.now();
-                res = commandHandler.wait(command, now);
+                Instant start = Instant.now();
+                res = commandHandler.wait(command, start);
                 connectionPool.slavesThatAreCaughtUp = 0;
                 break;
             case "PSYNC":
@@ -131,6 +135,8 @@ public class MasterTcpServer {
         }
         client.send(res, data);
     }
+
+
 
     private void propagate(String[] command) {
         String commandRespString = respSerializer.respArray(command);

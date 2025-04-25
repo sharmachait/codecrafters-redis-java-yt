@@ -181,6 +181,7 @@ public class SlaveTcpServer {
     }
 
     private String handleCommandFromMaster(String[] command, Client master) {
+
         String cmd = command[0];
         cmd = cmd.toUpperCase();
 
@@ -188,9 +189,9 @@ public class SlaveTcpServer {
         switch (cmd){
             case "SET":
                 commandHandler.set(command);
-                String respArr = respSerializer.respArray(command);
-                byte[] bytes = respArr.getBytes();
-                connectionPool.bytesSentToSlaves+=bytes.length;
+                String commandRespString = respSerializer.respArray(command);
+                byte[] toCount = commandRespString.getBytes();
+                connectionPool.bytesSentToSlaves += toCount.length;
                 CompletableFuture.runAsync(()->propagate(command));
                 break;
             case "REPLCONF":
@@ -269,12 +270,13 @@ public class SlaveTcpServer {
                 data = resDto.data;
                 break;
             case "WAIT":
-                if(connectionPool.bytesSentToSlaves == 0 ){
+                if(connectionPool.bytesSentToSlaves == 0){
                     res = respSerializer.respInteger(connectionPool.slavesThatAreCaughtUp);
                     break;
                 }
-                Instant now = Instant.now();
-                res = commandHandler.wait(command, now);
+
+                Instant start = Instant.now();
+                res = commandHandler.wait(command, start);
                 connectionPool.slavesThatAreCaughtUp = 0;
                 break;
         }
