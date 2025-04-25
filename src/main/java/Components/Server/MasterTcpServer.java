@@ -80,10 +80,6 @@ public class MasterTcpServer {
                 List<String[]> commands = respSerializer.deseralize(buffer);
 
                 for(String[] command :commands){
-                    System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-                    System.out.println(String.join(" ", command));
-                    System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-                    System.out.println();
                     handleCommand(command, client);
                 }
             }
