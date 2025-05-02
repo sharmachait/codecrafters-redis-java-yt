@@ -89,6 +89,17 @@ public class MasterTcpServer {
     }
 
     private void handleCommand(String[] command, Client client) throws IOException {
+
+        if(client.getTransactionContext() && !isTransactionControlCommand(command[0])){
+            transactionController(command, client);
+            return;
+        }
+
+        ResponseDto res = caseHandler(command, client);
+        client.send(res);
+    }
+
+    private ResponseDto caseHandler(String[] command, Client client) {
         String res = "";
         byte[] data = null;
         switch (command[0]){
@@ -132,10 +143,18 @@ public class MasterTcpServer {
                 data = resDto.data;
                 break;
         }
-        client.send(res, data);
+        return new ResponseDto(res, data);
     }
 
+    private void transactionController(String[] command, Client client) {
+    }
 
+    private boolean isTransactionControlCommand(String command) {
+        return switch (command) {
+            case "EXEC", "DISCARD" -> true;
+            default -> false;
+        };
+    }
 
     private void propagate(String[] command) {
         String commandRespString = respSerializer.respArray(command);

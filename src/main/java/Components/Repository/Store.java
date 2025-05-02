@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,6 +17,7 @@ public class Store {
     private static final Logger logger = Logger.getLogger(Store.class.getName());
 
     public ConcurrentHashMap<String, Value> map;
+    private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
     @Autowired
     public RespSerializer respSerializer;
     public Store(){
@@ -47,6 +50,14 @@ public class Store {
             logger.log(Level.SEVERE, e.getMessage());
             return "$-1\r\n";
         }
+    }
+
+    public void dumpTransaction(Map<String, Value> entries){
+        rwLock.writeLock().lock();
+        for(String s: entries.keySet()){
+            map.put(s, entries.get(s));
+        }
+        rwLock.writeLock().unlock();
     }
 
     public String get(String key){
