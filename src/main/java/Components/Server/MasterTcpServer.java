@@ -89,14 +89,17 @@ public class MasterTcpServer {
     }
 
     private void handleCommand(String[] command, Client client) throws IOException {
-
-        if(client.getTransactionContext() && !isTransactionControlCommand(command[0])){
+        if(!client.getTransactionContext()){
+            ResponseDto res = caseHandler(command, client);
+            client.send(res);
+        }
+        else if(!isTransactionControlCommand(command[0])){
             transactionController(command, client);
-            return;
+            client.send("+QUEUED\r\n");
+        }else{
+            // handle exec and discard
         }
 
-        ResponseDto res = caseHandler(command, client);
-        client.send(res);
     }
 
     private ResponseDto caseHandler(String[] command, Client client) {
@@ -108,6 +111,10 @@ public class MasterTcpServer {
                 break;
             case "ECHO":
                 res = commandHandler.echo(command);
+                break;
+            case "MULTI":
+                client.beginTransaction();
+                res = "+OK\r\n";
                 break;
             case "SET":
                 res = commandHandler.set(command);
@@ -147,6 +154,8 @@ public class MasterTcpServer {
     }
 
     private void transactionController(String[] command, Client client) {
+        ResponseDto res = caseHandler(command, client);
+
     }
 
     private boolean isTransactionControlCommand(String command) {

@@ -68,4 +68,8 @@ public class Client {
         if(data!=null)
             outputStream.write(data);
     }
+    public void send(String data) throws IOException {
+        if(data!=null)
+            outputStream.write(data.getBytes());
+    }
 }
