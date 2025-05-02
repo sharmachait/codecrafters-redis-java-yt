@@ -204,7 +204,7 @@ public class CommandHandler {
             val++;
             value.val=val+"";
 
-            res = "+"+value.val+"\r\n";
+            res = respSerializer.respInteger(val);
         } catch (Exception e) {
             res = "+(error) ERR value is not an integer or out of range\r\n";
         }
