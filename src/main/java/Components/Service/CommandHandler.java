@@ -196,9 +196,10 @@ public class CommandHandler {
         try{
             Value value = store.getValue(key);
 
-            if(value == null)
-                throw new RuntimeException("In valid key");
-
+            if(value == null){
+                store.set(key, "1");
+                value = store.getValue(key);
+            }
             int val = Integer.parseInt(value.val);
 
             val++;
