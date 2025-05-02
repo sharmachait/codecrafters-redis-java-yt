@@ -64,6 +64,14 @@ public class Client {
             outputStream.write(data);
     }
 
+    public void send(String response, byte[] data) throws IOException {
+
+        if(response !=null && !response.isEmpty())
+            outputStream.write(response.getBytes());
+        if(data!=null)
+            outputStream.write(data);
+    }
+
     public void send(byte[] data) throws IOException {
         if(data!=null)
             outputStream.write(data);
