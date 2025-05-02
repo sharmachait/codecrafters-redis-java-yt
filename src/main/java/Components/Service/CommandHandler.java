@@ -197,7 +197,7 @@ public class CommandHandler {
             Value value = store.getValue(key);
 
             if(value == null){
-                store.set(key, "1");
+                store.set(key, "0");
                 value = store.getValue(key);
             }
             int val = Integer.parseInt(value.val);
