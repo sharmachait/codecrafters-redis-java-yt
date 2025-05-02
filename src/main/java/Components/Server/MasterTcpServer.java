@@ -108,6 +108,9 @@ public class MasterTcpServer {
             case "GET":
                 res = commandHandler.get(command);
                 break;
+            case "INCR":
+                res = commandHandler.incr(command);
+                break;
             case "INFO":
                 res = commandHandler.info(command);
                 break;

@@ -4,6 +4,7 @@ import Components.Infra.Client;
 import Components.Infra.ConnectionPool;
 import Components.Infra.Slave;
 import Components.Repository.Store;
+import Components.Repository.Value;
 import Components.Server.RedisConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -187,5 +188,29 @@ public class CommandHandler {
         if(res > required)
             return respSerializer.respInteger(required);
         return respSerializer.respInteger(res);
+    }
+
+    public String incr(String[] command) {
+        String key = command[1];
+        String res = "";
+        try{
+            Value value = store.getValue(key);
+
+            if(value == null)
+                throw new RuntimeException("In valid key");
+
+            System.out.println(value.val);
+            int val = Integer.parseInt(value.val);
+            val++;
+            value.val=val+"";
+            System.out.println("=================================================================");
+            System.out.println(value.val);
+            System.out.println(store.getValue(key).val);
+            System.out.println("=================================================================");
+            res = value.val;
+        } catch (Exception e) {
+            res = "+(error) ERR value is not an integer or out of range\r\n";
+        }
+        return res;
     }
 }
