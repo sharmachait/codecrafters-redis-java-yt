@@ -199,15 +199,12 @@ public class CommandHandler {
             if(value == null)
                 throw new RuntimeException("In valid key");
 
-            System.out.println(value.val);
             int val = Integer.parseInt(value.val);
+
             val++;
             value.val=val+"";
-            System.out.println("=================================================================");
-            System.out.println(value.val);
-            System.out.println(store.getValue(key).val);
-            System.out.println("=================================================================");
-            res = value.val;
+
+            res = "+"+value.val+"\r\n";
         } catch (Exception e) {
             res = "+(error) ERR value is not an integer or out of range\r\n";
         }
