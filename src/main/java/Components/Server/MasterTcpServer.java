@@ -31,6 +31,7 @@ public class MasterTcpServer {
     private RedisConfig redisConfig;
     @Autowired
     private ConnectionPool connectionPool;
+
     public void startServer(){
         ServerSocket serverSocket = null;
         Socket clientSocket = null;
@@ -69,6 +70,7 @@ public class MasterTcpServer {
             }
         }
     }
+
     private void handleClient(Client client) throws IOException {
         connectionPool.addClient(client);
         while(client.socket.isConnected()){
@@ -94,12 +96,26 @@ public class MasterTcpServer {
             client.send(res);
         }
         else if(!isTransactionControlCommand(command[0])){
-            transactionController(command, client);
-            client.send("+QUEUED\r\n");
+            addCommandToTransaction(command, client);
         }else{
             // handle exec and discard
+            transactionController(command, client);
         }
 
+    }
+
+    private void transactionController(String[] command, Client client) {
+        switch (command[0]){
+            case "EXEC":
+                break;
+            case "DISCARD":
+                break;
+        }
+    }
+
+    private void addCommandToTransaction(String[] command, Client client) throws IOException {
+        client.commandQueue.offer(command);
+        client.send("+QUEUED\r\n");
     }
 
     private ResponseDto caseHandler(String[] command, Client client) {
@@ -153,10 +169,7 @@ public class MasterTcpServer {
         return new ResponseDto(res, data);
     }
 
-    private void transactionController(String[] command, Client client) {
-        ResponseDto res = caseHandler(command, client);
 
-    }
 
     private boolean isTransactionControlCommand(String command) {
         return switch (command) {

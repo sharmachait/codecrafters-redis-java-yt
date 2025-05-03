@@ -7,10 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 public class Client {
     public Socket socket;
@@ -19,9 +16,9 @@ public class Client {
 
     private boolean transactionalContext;
 
-    public String transactionResponse;
+    public List<String>  transactionResponse;
 
-    public Map<String, Value> watchedKeys;
+
     public Queue<String[]> commandQueue;
 
     public boolean getTransactionContext(){
@@ -32,13 +29,13 @@ public class Client {
         if(transactionalContext)
             return false;
         transactionalContext = true;
-        watchedKeys = new HashMap<>();
+
         commandQueue = new LinkedList<>();
         return true;
     }
 
     public void commitTransaction(){
-        watchedKeys = null;
+
         commandQueue = null;
         transactionalContext = false;
     }
