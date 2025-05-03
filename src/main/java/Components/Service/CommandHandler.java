@@ -285,13 +285,15 @@ public class CommandHandler {
                 case "INCR":
                     try{
                         key = command[1];
-                        value = store.getValue(key);
-
-                        if(value == null){
+                        cachedvalue = map.get(key);
+                        if(cachedvalue == null) {
+                            cachedvalue = store.getValue(key);
+                        }
+                        if(cachedvalue == null){
                             newValue = new Value("0", LocalDateTime.now(), LocalDateTime.MAX);
                         }
                         else{
-                            newValue = new Value(command[2], value.created, value.expiry);
+                            newValue = new Value(command[2], cachedvalue.created, cachedvalue.expiry);
                         }
 
                         int val = Integer.parseInt(newValue.val);
