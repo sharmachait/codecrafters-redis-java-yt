@@ -119,6 +119,7 @@ public class MasterTcpServer {
             case "EXEC":
                 if(client.commandQueue==null || client.commandQueue.isEmpty()){
                     client.send("*0\r\n");
+                    client.endTransaction();
                     return;
                 }
 
