@@ -203,111 +203,136 @@ public class CommandHandler {
         return res;
     }
 
-//    public BiFunction<String[], Map<String, Value>, String> getTransactionCommandCacheApplier() {
-//        // Capture the store reference from the current instance
-//        final Store localStore = this.store;
-//        final RespSerializer localSerializer = this.respSerializer;
-//
-//        return (String[] command, Map<String, Value> map) -> {
-//            String commandType = command[0];
-//
-//            switch (commandType) {
-//                case "SET":
-//                    return handleSetCommandTransactional(command, map);
-//                case "GET":
-//                    String key = command[1];
-//                    // Use the captured store reference
-//                    return localStore.get(key);
-//                case "INCR":
-//                    return handleIncrCommandTransactional(command, map, localStore, localSerializer);
-//                default:
-//                    return "-ERR unknown command '" + commandType + "'\r\n";
-//            }
-//        };
-//    }
-//
-//    private String handleSetCommandTransactional(String[] command, Map<String, Value> map) {
-//        String key = command[1];
-//        Value newValue = new Value(command[2], LocalDateTime.now(), LocalDateTime.MAX);
-//        map.put(key, newValue);
-//        return "+OK\r\n";
-//    }
-//
-//    private String handleIncrCommandTransactional(String[] command, Map<String, Value> map,
-//                                                  Store store, RespSerializer respSerializer) {
-//        try {
-//            String key = command[1];
-//            Value value = store.getValue(key);
-//            Value newValue;
-//
-//            if (value == null) {
-//                newValue = new Value("0", LocalDateTime.now(), LocalDateTime.MAX);
-//            } else {
-//                newValue = new Value(value.val, value.created, value.expiry);
-//            }
-//
-//            int val = Integer.parseInt(newValue.val);
-//            val++;
-//            newValue.val = String.valueOf(val);
-//
-//            map.put(key, newValue);
-//
-//            return respSerializer.respInteger(val);
-//        } catch (NumberFormatException e) {
-//            return "-ERR value is not an integer or out of range\r\n";
-//        }
-//    }
-
     public BiFunction<String[], Map<String, Value>, String> getTransactionCommandCacheApplier() {
-        return (String[] command, Map<String, Value> map)->{
-            String res="";
-            switch (command[0]){
-                case "SET":
-                    String key = command[1];
-                    Value value = store.getValue(key);
-                    Value newValue = new Value(command[2], LocalDateTime.now(), LocalDateTime.MAX);
-                    map.put(key, newValue);
-                    res =  "+OK\r\n";
-                    break;
-                case "GET":
-                    key = command[1];
-                    Value cachedvalue = map.get(key);
-
-                    if(cachedvalue!=null && cachedvalue.expiry.isBefore(LocalDateTime.now())){
-                        map.remove(key);
-                        return "$-1\r\n";
-                    }else if(cachedvalue!=null){
-                        res = respSerializer.serializeBulkString(cachedvalue.val);
-                    }else{
-                        res = store.get(key);
-                    }
-                    break;
-                case "INCR":
-                    try{
-                        key = command[1];
-                        cachedvalue = map.get(key);
-                        if(cachedvalue == null) {
-                            cachedvalue = store.getValue(key);
-                        }
-                        if(cachedvalue == null){
-                            newValue = new Value("0", LocalDateTime.now(), LocalDateTime.MAX);
-                        }
-                        else{
-                            newValue = new Value(command[2], cachedvalue.created, cachedvalue.expiry);
-                        }
-
-                        int val = Integer.parseInt(newValue.val);
-                        val++;
-
-                        newValue.val = val+"";
-
-                        res = respSerializer.respInteger(val);
-                    } catch (Exception e) {
-                        res = "-ERR value is not an integer or out of range\r\n";
-                    }
-                    break;
-            }
-            return res;
+        final Store localStore = this.store;
+        final RespSerializer localSerializer = this.respSerializer;
+        return (String[] command, Map<String, Value> map) -> {
+            String commandType = command[0];
+            return switch (commandType) {
+                case "SET" -> handleSetCommandTransactional(command, map);
+                case "GET" -> handleGetCommandTransactional(command, localStore, map, localSerializer);
+                case "INCR" -> handleIncrCommandTransactional(command, map, localStore, localSerializer);
+                default -> "-ERR unknown command '" + commandType + "'\r\n";
+            };
         };
     }
+
+    private static String handleGetCommandTransactional(
+            String[] command,
+            Store localStore,
+            Map<String, Value> map,
+            RespSerializer localSerializer) {
+        String key = command[1];
+        Value valueToUse;
+        Value cachedValue = map.getOrDefault(key, null);
+        if(cachedValue == null){
+            Value storeValue = localStore.getValue(key);
+            if(storeValue == null){
+                return localStore.get(key);
+            }else{
+                valueToUse = new Value(storeValue.val, storeValue.created, storeValue.expiry);
+                map.put(key, valueToUse);
+            }
+        }else{
+            valueToUse = cachedValue;
+        }
+        return localSerializer.serializeBulkString(valueToUse.val);
+    }
+
+    private String handleSetCommandTransactional(
+            String[] command,
+            Map<String, Value> map) {
+        String key = command[1];
+        Value newValue = new Value(command[2], LocalDateTime.now(), LocalDateTime.MAX);
+        map.put(key, newValue);
+        return "+OK\r\n";
+    }
+
+    private String handleIncrCommandTransactional(
+            String[] command,
+            Map<String, Value> map,
+            Store localStore,
+            RespSerializer respSerializer) {
+        try {
+            String key = command[1];
+            Value valueToUse;
+            Value cachedValue = map.getOrDefault(key, null);
+            if(cachedValue == null){
+                Value storeValue = localStore.getValue(key);
+                if(storeValue == null){
+                    valueToUse = new Value("0", LocalDateTime.now(), LocalDateTime.MAX);
+                }else{
+                    valueToUse = new Value(storeValue.val, storeValue.created, storeValue.expiry);
+                }
+            }else{
+                valueToUse = cachedValue;
+            }
+
+            int val = Integer.parseInt(valueToUse.val);
+            val++;
+            valueToUse.val = String.valueOf(val);
+
+            map.put(key, valueToUse);
+
+            return respSerializer.respInteger(val);
+        } catch (NumberFormatException e) {
+            return "-ERR value is not an integer or out of range\r\n";
+        }
+    }
+
+//    public BiFunction<String[], Map<String, Value>, String> getTransactionCommandCacheApplier() {
+//        return (String[] command, Map<String, Value> map)->{
+//            String res="";
+//            switch (command[0]){
+//                case "SET":
+//                    String key = command[1];
+//                    Value value = store.getValue(key);
+//                    Value newValue = new Value(command[2], LocalDateTime.now(), LocalDateTime.MAX);
+//                    map.put(key, newValue);
+//                    res =  "+OK\r\n";
+//                    break;
+//                case "GET":
+//                    key = command[1];
+//                    Value cachedvalue = map.get(key);
+//
+//                    if(cachedvalue!=null && cachedvalue.expiry.isBefore(LocalDateTime.now())){
+//                        map.remove(key);
+//                        return "$-1\r\n";
+//                    }else if(cachedvalue!=null){
+//                        res = respSerializer.serializeBulkString(cachedvalue.val);
+//                    }else{
+//                        cachedvalue = store.getValue(key);
+//                        map.put(key, cachedvalue);
+//                        res = store.get(key);
+//                    }
+//                    break;
+//                case "INCR":
+//                    try{
+//                        key = command[1];
+//                        cachedvalue = map.get(key);
+//                        if(cachedvalue == null) {
+//                            cachedvalue = store.getValue(key);
+//                        }
+//                        if(cachedvalue == null){
+//                            newValue = new Value("0", LocalDateTime.now(), LocalDateTime.MAX);
+//                        }
+//                        else{
+//                            newValue = new Value(command[2], cachedvalue.created, cachedvalue.expiry);
+//                        }
+//
+//                        int val = Integer.parseInt(newValue.val);
+//                        val++;
+//
+//                        newValue.val = val+"";
+//                        map.put(key, newValue);
+//
+//                        res = respSerializer.respInteger(val);
+//                    } catch (Exception e) {
+//                        res = "-ERR value is not an integer or out of range\r\n";
+//                    }
+//                    break;
+//            }
+//            return res;
+//        };
+//    }
 }
