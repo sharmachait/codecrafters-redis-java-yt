@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
@@ -201,9 +202,101 @@ public class CommandHandler {
         }
         return res;
     }
+
+//    public BiFunction<String[], Map<String, Value>, String> getTransactionCommandCacheApplier() {
+//        // Capture the store reference from the current instance
+//        final Store localStore = this.store;
+//        final RespSerializer localSerializer = this.respSerializer;
+//
+//        return (String[] command, Map<String, Value> map) -> {
+//            String commandType = command[0];
+//
+//            switch (commandType) {
+//                case "SET":
+//                    return handleSetCommandTransactional(command, map);
+//                case "GET":
+//                    String key = command[1];
+//                    // Use the captured store reference
+//                    return localStore.get(key);
+//                case "INCR":
+//                    return handleIncrCommandTransactional(command, map, localStore, localSerializer);
+//                default:
+//                    return "-ERR unknown command '" + commandType + "'\r\n";
+//            }
+//        };
+//    }
+//
+//    private String handleSetCommandTransactional(String[] command, Map<String, Value> map) {
+//        String key = command[1];
+//        Value newValue = new Value(command[2], LocalDateTime.now(), LocalDateTime.MAX);
+//        map.put(key, newValue);
+//        return "+OK\r\n";
+//    }
+//
+//    private String handleIncrCommandTransactional(String[] command, Map<String, Value> map,
+//                                                  Store store, RespSerializer respSerializer) {
+//        try {
+//            String key = command[1];
+//            Value value = store.getValue(key);
+//            Value newValue;
+//
+//            if (value == null) {
+//                newValue = new Value("0", LocalDateTime.now(), LocalDateTime.MAX);
+//            } else {
+//                newValue = new Value(value.val, value.created, value.expiry);
+//            }
+//
+//            int val = Integer.parseInt(newValue.val);
+//            val++;
+//            newValue.val = String.valueOf(val);
+//
+//            map.put(key, newValue);
+//
+//            return respSerializer.respInteger(val);
+//        } catch (NumberFormatException e) {
+//            return "-ERR value is not an integer or out of range\r\n";
+//        }
+//    }
+
     public BiFunction<String[], Map<String, Value>, String> getTransactionCommandCacheApplier() {
         return (String[] command, Map<String, Value> map)->{
-            return "";
+            String res="";
+            switch (command[0]){
+                case "SET":
+                    String key = command[1];
+                    Value value = store.getValue(key);
+                    Value newValue = new Value(command[2], LocalDateTime.now(), LocalDateTime.MAX);
+                    map.put(key, newValue);
+                    res =  "+OK\r\n";
+                    break;
+                case "GET":
+                    key = command[1];
+                    res = store.get(key);
+                    break;
+                case "INCR":
+                    try{
+                        key = command[1];
+                        value = store.getValue(key);
+
+                        if(value == null){
+                            newValue = new Value("0", LocalDateTime.now(), LocalDateTime.MAX);
+                        }
+                        else{
+                            newValue = new Value(command[2], value.created, value.expiry);
+                        }
+
+                        int val = Integer.parseInt(newValue.val);
+                        val++;
+
+                        newValue.val = val+"";
+
+                        res = respSerializer.respInteger(val);
+                    } catch (Exception e) {
+                        res = "-ERR value is not an integer or out of range\r\n";
+                    }
+                    break;
+            }
+            return res;
         };
     }
 }

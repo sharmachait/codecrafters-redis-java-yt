@@ -94,7 +94,7 @@ public class Store {
         rwLock.readLock().lock();
         try{
             LocalDateTime now = LocalDateTime.now();
-            Value value = map.get(key);
+            Value value = map.getOrDefault(key, null);
 
             if(value!=null && value.expiry.isBefore(now)){
                 map.remove(key);
