@@ -271,7 +271,16 @@ public class CommandHandler {
                     break;
                 case "GET":
                     key = command[1];
-                    res = store.get(key);
+                    Value cachedvalue = map.get(key);
+
+                    if(cachedvalue!=null && cachedvalue.expiry.isBefore(LocalDateTime.now())){
+                        map.remove(key);
+                        return "$-1\r\n";
+                    }else if(cachedvalue!=null){
+                        res = respSerializer.serializeBulkString(cachedvalue.val);
+                    }else{
+                        res = store.get(key);
+                    }
                     break;
                 case "INCR":
                     try{

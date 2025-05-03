@@ -120,9 +120,9 @@ public class RespSerializer {
     public String respArray(List<String> command) {
         List<String> res = new ArrayList<>();
         int len = command.size();
-        res.add("*"+len);
+        res.add("*"+len+"\r\n");
         res.addAll(command);
-        return String.join("\r\n",res)+"\r\n";
+        return String.join("",res);
     }
 
     public String[] parseArray(String[] parts) {
