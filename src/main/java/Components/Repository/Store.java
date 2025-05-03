@@ -66,10 +66,10 @@ public class Store {
         }
     }
 
-    public ReentrantReadWriteLock acquireLock(){
-        rwLock.writeLock().lock();
-        return rwLock;
-    }
+//    public ReentrantReadWriteLock acquireLock(){
+//        rwLock.writeLock().lock();
+//        return rwLock;
+//    }
 
     public String get(String key){
         rwLock.readLock().lock();
@@ -111,19 +111,23 @@ public class Store {
 
     public void executeTransaction(
             Client client,
-            Queue<String[]> commands,
             BiFunction<String[], Map<String, Value>, String> commandApplier
     ) {
         rwLock.writeLock().lock();
 
         try {
+
             Map<String, Value> transactionalMap = new HashMap<>();
             List<String> results = new ArrayList<>();
-            while(!commands.isEmpty()){
-                String[] command = commands.poll();
+
+            while(client.commandQueue!=null && !client.commandQueue.isEmpty()){
+
+                String[] command = client.commandQueue.poll();
                 String result = commandApplier.apply(command, transactionalMap);
+
                 results.add(result);
             }
+
             for (Map.Entry<String, Value> entry : transactionalMap.entrySet()) {
                 String key = entry.getKey();
                 Value value = entry.getValue();
@@ -141,3 +145,26 @@ public class Store {
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

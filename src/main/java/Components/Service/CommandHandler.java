@@ -14,7 +14,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,16 +26,12 @@ public class CommandHandler {
     private static final Logger logger = Logger.getLogger(CommandHandler.class.getName());
     @Autowired
     public RespSerializer respSerializer;
-
     @Autowired
     public Store store;
-
     @Autowired
     public RedisConfig redisConfig;
-
     @Autowired
     public ConnectionPool connectionPool;
-
     public String ping(String[] command){
         return "+PONG\r\n";
     }
@@ -59,7 +57,6 @@ public class CommandHandler {
             return "$-1\r\n";
         }
     }
-
     public String get(String[] command){
         try{
             String key = command[1];
@@ -69,7 +66,6 @@ public class CommandHandler {
             return "$-1\r\n";
         }
     }
-
     public String info(String[] command){
         // command[0]; info
         int replication = Arrays.stream(command).toList().indexOf("replication");
@@ -86,7 +82,6 @@ public class CommandHandler {
         }
         return "";
     }
-
     public String replconf(String[] command, Client client) {
 
         switch (command[1]){
@@ -122,14 +117,12 @@ public class CommandHandler {
 
         return "+OK\r\n";
     }
-
-    public byte[] concatenate(byte[] a, byte[] b){
+    private byte[] concatenate(byte[] a, byte[] b){
         byte[] result = new byte[a.length +b.length];
         System.arraycopy(a, 0, result, 0, a.length);
         System.arraycopy(b, 0, result, a.length, b.length);
         return result;
     }
-
     public ResponseDto psync(String[] command) {
         String replicationIdMaster = command[1];
         String replicationOffSetMaster = command[2];
@@ -154,7 +147,6 @@ public class CommandHandler {
         }
 
     }
-
     public String wait(String[] command, Instant start) {
         String[] getackarr = new String[] { "REPLCONF", "GETACK", "*" };
         String getack = respSerializer.respArray(getackarr);
@@ -167,7 +159,6 @@ public class CommandHandler {
         for(Slave slave: connectionPool.getSlaves()){
             CompletableFuture.runAsync(()->{
                 try {
-
                     slave.connection.send(getack.getBytes());
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -189,7 +180,6 @@ public class CommandHandler {
             return respSerializer.respInteger(required);
         return respSerializer.respInteger(res);
     }
-
     public String incr(String[] command) {
         String key = command[1];
         String res = "";
@@ -210,5 +200,10 @@ public class CommandHandler {
             res = "-ERR value is not an integer or out of range\r\n";
         }
         return res;
+    }
+    public BiFunction<String[], Map<String, Value>, String> getTransactionCommandCacheApplier() {
+        return (String[] command, Map<String, Value> map)->{
+            return "";
+        };
     }
 }

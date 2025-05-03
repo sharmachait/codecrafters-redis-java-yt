@@ -2,6 +2,8 @@ package Components.Server;
 
 import Components.Infra.ConnectionPool;
 import Components.Infra.Slave;
+import Components.Repository.Store;
+import Components.Repository.Value;
 import Components.Service.CommandHandler;
 import Components.Service.RespSerializer;
 import Components.Infra.Client;
@@ -15,8 +17,12 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.Instant;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,6 +37,8 @@ public class MasterTcpServer {
     private RedisConfig redisConfig;
     @Autowired
     private ConnectionPool connectionPool;
+    @Autowired
+    private Store store;
 
     public void startServer(){
         ServerSocket serverSocket = null;
@@ -92,10 +100,12 @@ public class MasterTcpServer {
 
     private void handleCommand(String[] command, Client client) throws IOException {
         if(!client.getTransactionContext()){
+            //no in transaction
             ResponseDto res = caseHandler(command, client);
             client.send(res);
         }
         else if(!isTransactionControlCommand(command[0])){
+            //not exec or discard
             addCommandToTransaction(command, client);
         }else{
             // handle exec and discard
@@ -104,11 +114,37 @@ public class MasterTcpServer {
 
     }
 
-    private void transactionController(String[] command, Client client) {
+    private void transactionController(String[] command, Client client) throws IOException {
         switch (command[0]){
             case "EXEC":
+                if(client.commandQueue==null || client.commandQueue.isEmpty()){
+                    client.send("*0\r\n");
+                    return;
+                }
+
+                Queue<String[]> commands = new LinkedList<>(client.commandQueue);
+
+                BiFunction<String[], Map<String, Value>, String> commandApplier = commandHandler.getTransactionCommandCacheApplier();
+
+                store.executeTransaction(client, commandApplier);
+
+                while(!commands.isEmpty()){
+                    String[] commandToPropagate = commands.poll();
+                    String commandRespString = respSerializer.respArray(commandToPropagate);
+                    byte[] toCount = commandRespString.getBytes();
+                    connectionPool.bytesSentToSlaves += toCount.length;
+                    CompletableFuture.runAsync(()->propagate(commandToPropagate));
+                }
+                client.endTransaction();
+
+                String response = respSerializer.respArray(client.transactionResponse);
+
+                client.send(response);
+
                 break;
             case "DISCARD":
+                client.endTransaction();
+                client.send("+OK\r\n");
                 break;
         }
     }
@@ -122,6 +158,12 @@ public class MasterTcpServer {
         String res = "";
         byte[] data = null;
         switch (command[0]){
+            case "EXEC":
+                res = "-ERR EXEC without MULTI\r\n";
+                break;
+            case "DISCARD":
+                res = "-ERR DISCARD without MULTI\r\n";
+                break;
             case "PING":
                 res = commandHandler.ping(command);
                 break;

@@ -34,11 +34,11 @@ public class Client {
         return true;
     }
 
-    public void commitTransaction(){
-
+    public void endTransaction(){
         commandQueue = null;
         transactionalContext = false;
     }
+
 
     public int id;
 
