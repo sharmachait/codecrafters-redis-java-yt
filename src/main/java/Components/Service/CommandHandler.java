@@ -12,9 +12,12 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -210,5 +213,54 @@ public class CommandHandler {
             res = "-ERR value is not an integer or out of range\r\n";
         }
         return res;
+    }
+    public BiFunction<String[], Map<String, Value>, String> getTransactionCommandCacheApplier(){
+        final Store localStore = this.store;
+        final RespSerializer localSerializer = this.respSerializer;
+        return (String[] command, Map<String, Value> map)->{
+            String res = "";
+            switch (command[0]) {
+                case "SET":
+                    res = handleSetCommandTransactional(command, map, localSerializer, localStore);
+                    break;
+                case "GET":
+                    res = handleGetCommandTransactional(command, map, localSerializer, localStore);
+                    break;
+                case "INCR":
+                    res = handleIncrCommandTransactional(command, map, localSerializer, localStore);
+                    break;
+                default:
+                    res = "-ERR unknown command '"+command[0]+"'\r\n";
+                    break;
+            }
+            return res;
+        };
+    }
+
+    private String handleIncrCommandTransactional(
+            String[] command,
+            Map<String, Value> map,
+            RespSerializer localSerializer,
+            Store localStore) {
+
+    }
+
+    private String handleGetCommandTransactional(
+            String[] command,
+            Map<String, Value> map,
+            RespSerializer localSerializer,
+            Store localStore) {
+
+    }
+
+    private String handleSetCommandTransactional(
+            String[] command,
+            Map<String, Value> map,
+            RespSerializer localSerializer,
+            Store localStore) {
+        String key = command[1];
+        Value newValue = new Value(command[2], LocalDateTime.now(), LocalDateTime.MAX);
+        map.put(key, newValue);
+        return "+OK\r\n";
     }
 }

@@ -6,11 +6,11 @@ public class Value {
     public String val;
     public LocalDateTime created;
     public LocalDateTime expiry;
-
+    public boolean isDeletedInPublic;// flag to delete after transaction
     public Value( String val, LocalDateTime created, LocalDateTime expiry) {
         this.created = created;
         this.val = val;
         this.expiry = expiry;
+        this.isDeletedInPublic = false;
     }
-
 }

@@ -2,6 +2,7 @@ package Components.Server;
 
 import Components.Infra.ConnectionPool;
 import Components.Infra.Slave;
+import Components.Repository.Store;
 import Components.Service.CommandHandler;
 import Components.Service.RespSerializer;
 import Components.Infra.Client;
@@ -15,8 +16,11 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.Instant;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,6 +35,8 @@ public class MasterTcpServer {
     private RedisConfig redisConfig;
     @Autowired
     private ConnectionPool connectionPool;
+    @Autowired
+    private Store store;
     public void startServer(){
         ServerSocket serverSocket = null;
         Socket clientSocket = null;
@@ -89,11 +95,87 @@ public class MasterTcpServer {
     }
 
     private void handleCommand(String[] command, Client client) throws IOException {
+        if(!client.getTransactionalContext()){
+            ResponseDto responseDto = caseHandler(command, client);
+            client.send(responseDto);
+        }else if(!isTransactionalControlCommand(command[0])){
+            // we are in the transactional context and the command is a normal command
+            addCommandToTransaction(command, client);
+        }else{
+            // we are in the transactional context and the command is a transaction control command, EXEC or DISCARD
+            transactionController(command, client);
+        }
+
+    }
+
+    private void transactionController(String[] command, Client client) throws IOException {
+        //control only comes here in the transaction context
+        switch (command[0]){
+            case "EXEC":
+                if(client.commandQueue==null || client.commandQueue.isEmpty()){
+                    client.send("*0\r\n");
+                    client.endTransaction();
+                    return;
+                }
+
+                Queue<String[]> commands = new LinkedList<>(client.commandQueue);
+
+                //execute the transaction
+
+
+
+                store.executeTransaction(client);
+
+                client.endTransaction();
+                while(!commands.isEmpty()){
+                    String[] commandToPropagate = commands.poll();
+                    String commandRespString = respSerializer.respArray(commandToPropagate);
+                    byte[] toCount = commandRespString.getBytes();
+                    connectionPool.bytesSentToSlaves += toCount.length;
+                    CompletableFuture.runAsync(()->propagate(commandToPropagate));
+                }
+
+                String response = respSerializer.respArray(client.transactionResponse);
+
+                client.send(response);
+
+                break;
+            case "DISCARD":
+                client.endTransaction();
+                client.send("+OK\r\n");
+                break;
+        }
+    }
+
+    private void addCommandToTransaction(String[] command, Client client) throws IOException {
+        client.commandQueue.offer(command);
+        client.send("+QUEUED\r\n");
+    }
+
+    private boolean isTransactionalControlCommand(String command) {
+        return switch (command) {
+            case "EXEC", "DISCARD" -> true;
+            default -> false;
+        };
+    }
+
+    public ResponseDto caseHandler(String[] command, Client client){
+        //control comes here only when the client is not in a transaction
         String res = "";
         byte[] data = null;
         switch (command[0]){
             case "PING":
                 res = commandHandler.ping(command);
+                break;
+            case "EXEC":
+                res = "-ERR EXEC without MULTI\r\n";
+                break;
+            case "DISCARD":
+                res = "-ERR DISCARD without MULTI\r\n";
+                break;
+            case "MULTI":
+                client.beginTransaction();
+                res = "+OK\r\n";
                 break;
             case "INCR":
                 res = commandHandler.incr(command);
@@ -132,9 +214,8 @@ public class MasterTcpServer {
                 data = resDto.data;
                 break;
         }
-        client.send(res, data);
+        return new ResponseDto(res, data);
     }
-
 
 
     private void propagate(String[] command) {
