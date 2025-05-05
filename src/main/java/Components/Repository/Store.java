@@ -6,9 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -101,8 +102,34 @@ public class Store {
     }
 
     public void executeTransaction(
-            Client client
+            Client client,
+            BiFunction<String[], Map<String, Value>, String> transactionCacheApplier
     ){
+        rwLock.writeLock().lock();
+        Map<String, Value> localCache = new HashMap<>();
+        List<String> responses = new ArrayList<>();
+        try{
+            while(!client.commandQueue.isEmpty()){
+                String[] command = client.commandQueue.poll();
+                String response = transactionCacheApplier.apply(command, localCache);
+                responses.add(response);
+            }
+            //control will only come here when the queue is empty, that means no other commands in the transaction left to be applied
 
+            for(Map.Entry<String, Value> entry : localCache.entrySet()){
+                String key = entry.getKey();
+                Value value = entry.getValue();
+
+                if(value.isDeletedInTransaction){
+                    this.map.remove(key);
+                }else{
+                    this.map.put(key, value);
+                }
+            }
+
+            client.transactionResponse.addAll(responses);
+        }finally {
+            rwLock.writeLock().unlock();
+        }
     }
 }

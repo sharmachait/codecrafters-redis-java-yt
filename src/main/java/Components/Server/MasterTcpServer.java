@@ -3,6 +3,7 @@ package Components.Server;
 import Components.Infra.ConnectionPool;
 import Components.Infra.Slave;
 import Components.Repository.Store;
+import Components.Repository.Value;
 import Components.Service.CommandHandler;
 import Components.Service.RespSerializer;
 import Components.Infra.Client;
@@ -18,6 +19,7 @@ import java.net.Socket;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
@@ -121,10 +123,8 @@ public class MasterTcpServer {
                 Queue<String[]> commands = new LinkedList<>(client.commandQueue);
 
                 //execute the transaction
-
-
-
-                store.executeTransaction(client);
+                BiFunction<String[], Map<String, Value>, String> transactionCacheApplier = commandHandler.getTransactionCommandCacheApplier();
+                store.executeTransaction(client, transactionCacheApplier);
 
                 client.endTransaction();
                 while(!commands.isEmpty()){

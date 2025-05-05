@@ -27,16 +27,12 @@ public class CommandHandler {
     private static final Logger logger = Logger.getLogger(CommandHandler.class.getName());
     @Autowired
     public RespSerializer respSerializer;
-
     @Autowired
     public Store store;
-
     @Autowired
     public RedisConfig redisConfig;
-
     @Autowired
     public ConnectionPool connectionPool;
-
     public String ping(String[] command){
         return "+PONG\r\n";
     }
@@ -62,7 +58,6 @@ public class CommandHandler {
             return "$-1\r\n";
         }
     }
-
     public String get(String[] command){
         try{
             String key = command[1];
@@ -72,7 +67,6 @@ public class CommandHandler {
             return "$-1\r\n";
         }
     }
-
     public String info(String[] command){
         // command[0]; info
         int replication = Arrays.stream(command).toList().indexOf("replication");
@@ -89,7 +83,6 @@ public class CommandHandler {
         }
         return "";
     }
-
     public String replconf(String[] command, Client client) {
 
         switch (command[1]){
@@ -125,14 +118,12 @@ public class CommandHandler {
 
         return "+OK\r\n";
     }
-
     public byte[] concatenate(byte[] a, byte[] b){
         byte[] result = new byte[a.length +b.length];
         System.arraycopy(a, 0, result, 0, a.length);
         System.arraycopy(b, 0, result, a.length, b.length);
         return result;
     }
-
     public ResponseDto psync(String[] command) {
         String replicationIdMaster = command[1];
         String replicationOffSetMaster = command[2];
@@ -157,7 +148,6 @@ public class CommandHandler {
         }
 
     }
-
     public String wait(String[] command, Instant start) {
         String[] getackarr = new String[] { "REPLCONF", "GETACK", "*" };
         String getack = respSerializer.respArray(getackarr);
@@ -192,7 +182,6 @@ public class CommandHandler {
             return respSerializer.respInteger(required);
         return respSerializer.respInteger(res);
     }
-
     public String incr(String[] command) {
         String key =command[1];
         String res = "";
@@ -229,6 +218,9 @@ public class CommandHandler {
                 case "INCR":
                     res = handleIncrCommandTransactional(command, map, localSerializer, localStore);
                     break;
+                case "DEL":
+                    res = handleDelCommandTransactional(command, map, localSerializer, localStore);
+                    break;
                 default:
                     res = "-ERR unknown command '"+command[0]+"'\r\n";
                     break;
@@ -237,22 +229,76 @@ public class CommandHandler {
         };
     }
 
+    private String handleDelCommandTransactional(String[] command, Map<String, Value> map, RespSerializer localSerializer, Store localStore) {
+        String key = command[1];
+        Value valueToUse;
+        Value cachedValue = map.getOrDefault(key, null);
+        if(cachedValue==null){
+            Value storeValue = localStore.getValue(key);
+            if(storeValue == null){
+                //both are null
+                return "-ERR deleting and invalid key\r\n";
+            }else{
+                valueToUse = new Value(storeValue.val, storeValue.created, storeValue.expiry);
+            }
+        }else{
+            valueToUse = cachedValue;
+        }
+        valueToUse.isDeletedInTransaction =true;
+        map.put(key, valueToUse);
+        return "+OK\r\n";
+    }
+
     private String handleIncrCommandTransactional(
             String[] command,
             Map<String, Value> map,
             RespSerializer localSerializer,
             Store localStore) {
-
+        try{
+            String key = command[1];
+            Value valueToUse;
+            Value cachedValue = map.getOrDefault(key, null);
+            if(cachedValue==null){
+                Value storeValue = localStore.getValue(key);
+                if(storeValue==null) {
+                    valueToUse = new Value("0", LocalDateTime.now(), LocalDateTime.MAX);
+                }else{
+                    valueToUse = new Value(storeValue.val, storeValue.created, storeValue.expiry);
+                }
+            }else{
+                valueToUse=cachedValue;
+            }
+            int val = Integer.parseInt(valueToUse.val);
+            val++;
+            valueToUse.val = String.valueOf(val);
+            map.put(key, valueToUse);
+            return respSerializer.respInteger(val);
+        } catch (Exception e) {
+            return "-ERR value is not an integer or out of range\r\n";
+        }
     }
-
     private String handleGetCommandTransactional(
             String[] command,
             Map<String, Value> map,
             RespSerializer localSerializer,
             Store localStore) {
-
+        String key = command[1];
+        Value valueToUse;
+        Value cachedValue = map.getOrDefault(key, null);
+        if(cachedValue==null){
+            Value storeValue = localStore.getValue(key);
+            if(storeValue ==null){
+                //both are null
+                return localStore.get(key);
+            }else{
+                valueToUse = new Value(storeValue.val, storeValue.created, storeValue.expiry);
+                map.put(key, valueToUse);
+            }
+        }else{
+            valueToUse = cachedValue;
+        }
+        return respSerializer.serializeBulkString(valueToUse.val);
     }
-
     private String handleSetCommandTransactional(
             String[] command,
             Map<String, Value> map,
