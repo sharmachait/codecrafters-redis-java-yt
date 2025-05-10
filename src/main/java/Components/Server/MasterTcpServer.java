@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.Instant;
@@ -222,6 +223,12 @@ public class MasterTcpServer {
         String commandRespString = respSerializer.respArray(command);
         try{
             for(Slave slave: connectionPool.getSlaves()){
+                System.out.println("========================= sending command down to slave ==============================");
+                System.out.println("command: "+commandRespString);
+                System.out.println(slave.connection.id);
+                InetAddress remoteAddress = slave.connection.socket.getInetAddress();
+                System.out.println("Remote IP address: " + remoteAddress.getHostAddress() +": "+slave.connection.socket.getPort());
+
                 slave.send(commandRespString.getBytes());
             }
         } catch (IOException e) {
