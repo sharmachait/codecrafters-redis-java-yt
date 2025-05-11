@@ -32,3 +32,14 @@ Note: This section is for stages 2 and beyond.
    `src/main/java/Main.java`.
 1. Commit your changes and run `git push origin master` to submit your solution
    to CodeCrafters. Test output will be streamed to your terminal.
+### Dockerize
+
+```shell
+docker build -t myredis .
+
+docker run -p 6379:6379 myredis
+
+ip route show | grep default | awk '{print $3}'
+
+docker run -p 6480:6480 myredis --port 6480 --replicaof "<ipaddress> 6379"
+```
