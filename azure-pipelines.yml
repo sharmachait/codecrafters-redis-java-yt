@@ -2,20 +2,30 @@ trigger:
 - master
 
 pool:
-  name: agent   # Use your custom agent pool named 'agent'
+  name: agent
 
 variables:
-  dockerHubRepository: 'beelzekamibub/myapp'   # Change 'myapp' to your preferred image name
+  dockerHubRepository: 'beelzekamibub/redisjava'
   tag: '$(Build.BuildId)'
 
 steps:
 - task: Docker@2
-  displayName: 'Build and push Docker image to Docker Hub'
+  displayName: 'Build Docker image'
   inputs:
     command: 'build'
     repository: $(dockerHubRepository)
     dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
     buildContext: '$(Build.SourcesDirectory)'
+    tags: |
+      $(tag)
+      latest
+
+- task: Docker@2
+  displayName: 'Push Docker image to Docker Hub'
+  inputs:
+    command: 'push'
+    repository: $(dockerHubRepository)
+    containerRegistry: 'dockerhub'
     tags: |
       $(tag)
       latest
