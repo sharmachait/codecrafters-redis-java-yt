@@ -12,7 +12,7 @@ steps:
 - task: Docker@2
   displayName: 'Build and push Docker image to Docker Hub'
   inputs:
-    command: 'buildAndPush'
+    command: 'build'
     repository: $(dockerHubRepository)
     dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
     buildContext: '$(Build.SourcesDirectory)'
