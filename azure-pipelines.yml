@@ -1,19 +1,21 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - master
 
 pool:
-  pool: agent
+  name: agent   # Use your custom agent pool named 'agent'
+
+variables:
+  dockerHubRepository: 'beelzekamibub/myapp'   # Change 'myapp' to your preferred image name
+  tag: '$(Build.BuildId)'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: Docker@2
+  displayName: 'Build and push Docker image to Docker Hub'
+  inputs:
+    command: 'buildAndPush'
+    repository: $(dockerHubRepository)
+    dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+    buildContext: '$(Build.SourcesDirectory)'
+    tags: |
+      $(tag)
+      latest
