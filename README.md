@@ -32,6 +32,7 @@ Note: This section is for stages 2 and beyond.
    `src/main/java/Main.java`.
 1. Commit your changes and run `git push origin master` to submit your solution
    to CodeCrafters. Test output will be streamed to your terminal.
+
 ### Dockerize
 
 ```shell
@@ -43,3 +44,18 @@ ip route show | grep default | awk '{print $3}'
 
 docker run -p 6480:6480 myredis --port 6480 --replicaof "<ipaddress> 6379"
 ```
+
+### Self Hosted Agent with Docker capabilities
+
+```shell
+cd dind
+
+docker build --tag "azp-agent:linux"  .
+
+docker run --privileged -e AZP_URL="<Azure DevOps instance>" -e AZP_TOKEN="<Personal Access Token>" -e AZP_POOL="<Agent Pool Name>" -e AZP_AGENT_NAME="Docker Agent - Linux" --name "azp-agent-linux" azp-agent:linux
+```
+
+### CI
+1. create a service connection to docker hub
+2. make sure to check grant permission to all pipelines to use it
+3. add yaml pipeline from branch azure-pipelines
