@@ -54,8 +54,3 @@ docker build --tag "azp-agent:linux"  .
 
 docker run --privileged -e AZP_URL="<Azure DevOps instance>" -e AZP_TOKEN="<Personal Access Token>" -e AZP_POOL="<Agent Pool Name>" -e AZP_AGENT_NAME="Docker Agent - Linux" --name "azp-agent-linux" azp-agent:linux
 ```
-
-### CI
-1. create a service connection to docker hub
-2. make sure to check grant permission to all pipelines to use it
-3. add yaml pipeline from branch azure-pipelines
