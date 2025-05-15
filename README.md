@@ -52,5 +52,5 @@ cd dind
 
 docker build --tag "azp-agent:linux"  .
 
-docker run --privileged -e AZP_URL="<Azure DevOps instance>" -e AZP_TOKEN="<Personal Access Token>" -e AZP_POOL="<Agent Pool Name>" -e AZP_AGENT_NAME="Docker Agent - Linux" --name "azp-agent-linux" azp-agent:linux
+docker run --privileged -e AZP_URL="https://dev.azure.com/ChaitanyaDSharma" -e AZP_TOKEN="use your own token" -e AZP_POOL="agent" -e AZP_AGENT_NAME="Docker Agent - Linux" --name "azp-agent-linux" azp-agent:linux
 ```
