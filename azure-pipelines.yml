@@ -6,7 +6,7 @@ pool:
 
 variables:
   dockerHubRepository: 'beelzekamibub/redisjava'
-  tag: '$(Build.BuildIid)'
+  tag: '$(Build.BuildId)'
 
 steps:
 - task: Docker@2
