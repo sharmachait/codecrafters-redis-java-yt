@@ -1,0 +1,31 @@
+trigger:
+- master
+
+pool:
+  name: agent
+
+variables:
+  dockerHubRepository: 'beelzekamibub/redisjava'
+  tag: '$(Build.BuildId)'
+
+steps:
+- task: Docker@2
+  displayName: 'Build Redis Image'
+  inputs:
+    containerRegistry: 'dockerhub'
+    repository: '$(dockerHubRepository)'
+    command: 'build'
+    Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+    buildContext: '$(Build.SourcesDirectory)'
+    tags: |
+      $(tag)
+      latest
+- task: Docker@2
+  displayName: 'Push Redis Image to DockerHub'
+  inputs:
+    containerRegistry: 'dockerhub'
+    repository: '$(dockerHubRepository)'
+    command: 'push'
+    tags: |
+      $(tag)
+      latest
