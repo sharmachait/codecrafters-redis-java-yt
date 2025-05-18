@@ -86,8 +86,6 @@ metadata:
     run: redis
   name: redis
   namespace: default
-  annotations:
-    helm.sh/hook-weight: "-5"
 spec:
   containers:
     - image: beelzekamibub/redis:latest
@@ -104,8 +102,6 @@ metadata:
   labels:
     run: redis
   name: redis-service
-  annotations:
-    helm.sh/hook-weight: "5"
 spec:
   ports:
     - port: 6379
@@ -122,4 +118,20 @@ k apply -f pod.yml
 k apply -f service.yml
 # run ise
 helm create redis-chart
+```
+
+clean out templates folder, delete charts folder, as no dependencies
+
+Move the pod.yml and service.yml to 
+
+templatize the yaml files and add to values.yml
+
+add annotations for helm hook
+
+```shell
+helm template redis-chart
+helm lint redis-chart
+helm install redis-app redis-chart
+
+helm uninstall redis-app
 ```

@@ -5,7 +5,7 @@ metadata:
     run: redis
   name: redis-service
   annotations:
-    helm.sh/hook-weight: "5"
+    helm.sh/hook-weight: "1"
 spec:
   ports:
     - port: {{ .Values.service.port }}
