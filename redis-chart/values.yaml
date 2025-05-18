@@ -1,0 +1,9 @@
+image:
+  repository: beelzekamibub/redis
+  tag: latest
+  pullPolicy: Never
+
+service:
+  type: NodePort
+  port: 6379
+  nodePort: 30007

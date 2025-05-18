@@ -54,3 +54,72 @@ docker build --tag "azp-agent:linux"  .
 
 docker run --privileged -e AZP_URL="https://dev.azure.com/ChaitanyaDSharma" -e AZP_TOKEN="use your own token" -e AZP_POOL="agent" -e AZP_AGENT_NAME="Docker Agent - Linux" --name "azp-agent-linux" azp-agent:linux
 ```
+
+### K8s cluster on KIND + Helm
+
+```shell
+mkdir kind
+cd kind
+vi k.yml
+```
+```yml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  extraPortMappings:
+  - containerPort: 30007
+    hostPort: 30007
+```
+```shell
+kind create cluster --config k.yml --name cluster-name
+cd ..
+docker build -t beelzekamibub/redis:latest .
+kind load docker-image beelzekamibub/redis:latest --name cluster-name
+vi pod.yml
+```
+```yml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: redis
+  name: redis
+  namespace: default
+  annotations:
+    helm.sh/hook-weight: "-5"
+spec:
+  containers:
+    - image: beelzekamibub/redis:latest
+      imagePullPolicy: Never
+      name: redis
+```
+```shell
+vi service.yml
+```
+```yml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: redis
+  name: redis-service
+  annotations:
+    helm.sh/hook-weight: "5"
+spec:
+  ports:
+    - port: 6379
+      protocol: TCP
+      targetPort: 6379
+      nodePort: 30007
+  selector:
+    run: redis
+  type: NodePort
+```
+```shell
+alias k=kubectl
+k apply -f pod.yml
+k apply -f service.yml
+# run ise
+helm create redis-chart
+```
