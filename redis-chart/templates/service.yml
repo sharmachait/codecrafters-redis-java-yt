@@ -4,12 +4,14 @@ metadata:
   labels:
     run: redis
   name: redis-service
+  annotations:
+    helm.sh/hook-weight: "1"
 spec:
   ports:
-  - port: {{ .Values.service.port }}
-    protocol: TCP
-    targetPort: {{ .Values.service.port }}
-    nodePort: {{ .Values.service.nodeport }}
+    - port: {{ .Values.service.port }}
+      protocol: TCP
+      targetPort: {{ .Values.service.port }}
+      nodePort: {{ .Values.service.nodePort }}
   selector:
     run: redis
   type: {{ .Values.service.type }}
